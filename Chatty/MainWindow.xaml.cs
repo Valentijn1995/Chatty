@@ -17,30 +17,28 @@ namespace Chatty
 
             _client = new ChattyClient();
             _client.SetMessageListener(new SocketIOListener("....Adress...."));
-            _client.Listener.OnMessageReceived += OnMessageReceived;
-            _client.Listener.OnGroupMessageReceived += OnGroupMessageReceived;
+            _client.Listener.OnMessageReceived += Listener_OnMessageReceived;
+            _client.Listener.OnUserSearch += Listener_OnUserSearch;
+            _client.Listener.OnUserConfirm += Listener_OnUserConfirm;
+            _client.Listener.OnGroupJoined += Listener_OnGroupJoined;
 
             _manager = new ClientManager();
         }
 
-        private void OnMessageReceived(object sender, MessageReceivedEventArgs e) {
-            if(_manager.GetClient(e.Identifier) == null) {
-                _manager.AddClient(new Client() { PublicKey = e.Identifier, UserName = e.UserName });
-                listView_Clients.Items.Add(new ChatItem() { Identifier = e.Identifier, Value = e.UserName });
-            }
-            
-            //Push to chat
-            Highlight(e.Identifier, true);
+        private void Listener_OnGroupJoined(object sender, GroupJoinedEventArgs e) {
+            _manager.AddGroup(new Group() { GroupId = e.GroupName, ClientList = e.Members });
         }
 
-        private void OnGroupMessageReceived(object sender, GroupMessageReceivedEventArgs e) {
-            if(_manager.GetGroup(e.Identifier) == null) {
-                _manager.AddGroup(new Group() { GroupId = e.Identifier, ClientList = e.Clients });
-                listView_Clients.Items.Add(new ChatItem() { Identifier = e.Identifier, Value = e.Identifier });
-            }
+        private void Listener_OnUserConfirm(object sender, UserComfirmEventArgs e) {
+            throw new System.NotImplementedException();
+        }
 
-            //Push to chat
-            Highlight(e.Identifier, true);
+        private void Listener_OnUserSearch(object sender, UserSearchEventArgs e) {
+            throw new System.NotImplementedException();
+        }
+
+        private void Listener_OnMessageReceived(object sender, MessageReceivedEventArgs e) {
+            throw new System.NotImplementedException();
         }
 
         private void Button_Send_Click(object sender, RoutedEventArgs e) {

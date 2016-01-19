@@ -11,7 +11,7 @@ namespace Chatty
         }
 
         public void SendGroupMessage(Group group, string message) {
-            Listener.SendGroupMessage(group.GroupId, message);
+            Listener.SendMessage(group.ClientList, message);
         }
 
         public void SetMessageListener(IMessageListener listener) {
