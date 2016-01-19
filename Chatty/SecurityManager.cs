@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Chatty {
+namespace Chatty
+{
     public static class SecurityManager {
 
         [Serializable]
@@ -48,13 +46,20 @@ namespace Chatty {
             }
 
             private static byte[] Encrypt(byte[] data, int keySize, string publicKeyXml) {
-                if (data == null || data.Length == 0) throw new ArgumentException("Data are empty", "data");
-                int maxLength = GetMaxDataLength(keySize);
-                if (data.Length > maxLength) throw new ArgumentException(String.Format("Maximum data length is {0}", maxLength), "data");
-                if (!IsKeySizeValid(keySize)) throw new ArgumentException("Key size is not valid", "keySize");
-                if (String.IsNullOrEmpty(publicKeyXml)) throw new ArgumentException("Key is null or empty", "publicKeyXml");
+                if(data == null || data.Length == 0)
+                    throw new ArgumentException("Data are empty", nameof(data));
 
-                using (var provider = new RSACryptoServiceProvider(keySize)) {
+                int maxLength = GetMaxDataLength(keySize);
+                if (data.Length > maxLength)
+                    throw new ArgumentException(String.Format("Maximum data length is {0}", maxLength), nameof(data));
+
+                if(!IsKeySizeValid(keySize))
+                    throw new ArgumentException("Key size is not valid", nameof(keySize));
+
+                if(String.IsNullOrEmpty(publicKeyXml))
+                    throw new ArgumentException("Key is null or empty", nameof(publicKeyXml));
+
+                using(var provider = new RSACryptoServiceProvider(keySize)) {
                     provider.FromXmlString(publicKeyXml);
                     return provider.Encrypt(data, _optimalAsymmetricEncryptionPadding);
                 }
@@ -71,11 +76,10 @@ namespace Chatty {
             }
 
             private static byte[] Decrypt(byte[] data, int keySize, string publicAndPrivateKeyXml) {
-                if (data == null || data.Length == 0) throw new ArgumentException("Data are empty", "data");
-                if (!IsKeySizeValid(keySize)) throw new ArgumentException("Key size is not valid", "keySize");
-                if (String.IsNullOrEmpty(publicAndPrivateKeyXml)) throw new ArgumentException("Key is null or empty", "publicAndPrivateKeyXml");
-
-                using (var provider = new RSACryptoServiceProvider(keySize)) {
+                if(data == null || data.Length == 0) throw new ArgumentException("Data are empty", nameof(data));
+                if (!IsKeySizeValid(keySize)) throw new ArgumentException("Key size is not valid", nameof(keySize));
+                if (String.IsNullOrEmpty(publicAndPrivateKeyXml)) throw new ArgumentException("Key is null or empty", nameof(publicAndPrivateKeyXml));
+                using(var provider = new RSACryptoServiceProvider(keySize)) {
                     provider.FromXmlString(publicAndPrivateKeyXml);
                     return provider.Decrypt(data, _optimalAsymmetricEncryptionPadding);
                 }
@@ -88,15 +92,11 @@ namespace Chatty {
                 return ((keySize - 384) / 8) + 37;
             }
 
-            public static bool IsKeySizeValid(int keySize) {
-                return keySize >= 384 &&
-                        keySize <= 16384 &&
-                        keySize % 8 == 0;
-            }
+            public static bool IsKeySizeValid(int keySize) => keySize >= 384 &&
+                keySize <= 16384 &&
+                keySize % 8 == 0;
 
-            private static string IncludeKeyInEncryptionString(string publicKey, int keySize) {
-                return Convert.ToBase64String(Encoding.UTF8.GetBytes(keySize.ToString() + "!" + publicKey));
-            }
+            private static string IncludeKeyInEncryptionString(string publicKey, int keySize) => Convert.ToBase64String(Encoding.UTF8.GetBytes(keySize.ToString() + "!" + publicKey));
 
             private static void GetKeyFromEncryptionString(string rawkey, out int keySize, out string xmlKey) {
                 keySize = 0;

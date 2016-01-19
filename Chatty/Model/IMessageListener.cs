@@ -9,10 +9,10 @@ namespace Chatty
         event EventHandler<UserComfirmEventArgs> OnUserConfirm;
         event EventHandler<GroupJoinedEventArgs> OnGroupJoined;
         event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
-
-        void SendMessage(Client client, string message);
+        
         void SendMessage(string identifier, string message);
-        void SendMessage(List<Client> clients, string message);
+        void ConfirmUser(string identifier);
+        void SendMessage(List<string> receivers, string message);
     }
 
     public class MessageReceivedEventArgs : EventArgs
@@ -20,6 +20,7 @@ namespace Chatty
         public string Message { get; set; }
         public long TimeStamp { get; set; }
         public string Identifier { get; set; }
+        public bool GroupMessage { get; set; }
     }
 
     public class UserSearchEventArgs : EventArgs {
@@ -27,6 +28,7 @@ namespace Chatty
     }
 
     public class UserComfirmEventArgs : EventArgs {
+        public string UserName { get; set; }
         public string PublicKey { get; set; }
     }
 

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SocketIOClient;
 using System;
 using System.Collections.Generic;
 
@@ -55,16 +54,17 @@ namespace Chatty.Model
 
         public void SendMessage(string identifier, string message) {
             if(_socket != null)
-                _socket.Emit("message", new object());
+                _socket.Emit("message", new JsonSendMessage() { ReceiverIdentifier = identifier, Message = message });
         }
 
-        public void SendMessage(Client client, string message) {
-            SendMessage(client.PublicKeyHash, message);
-        }
-
-        public void SendMessage(List<Client> clients, string message) {
+        public void SendMessage(List<string> receivers, string message) {
             if (_socket == null)
-                clients.ForEach(client => { SendMessage(client, message); });
+                receivers.ForEach(receiver => { SendMessage(receiver, message); });
+        }
+
+        public void ConfirmUser(string identifier) {
+            if(_socket == null)
+                _socket.Emit("comfirm-user", identifier);
         }
     }
 

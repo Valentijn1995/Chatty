@@ -1,5 +1,5 @@
 ﻿using Chatty.Model;
-using System;
+using System.Linq;
 
 namespace Chatty
 {
@@ -11,19 +11,15 @@ namespace Chatty
         }
 
         public void SendGroupMessage(Group group, string message) {
-            Listener.SendMessage(group.ClientList, message);
+            Listener.SendMessage(group.ClientList.Select(client => client.PublicKeyHash).ToList() , message);
+        }
+
+        internal void ConfirmUser(string identifier) {
+            Listener.ConfirmUser(identifier);
         }
 
         public void SetMessageListener(IMessageListener listener) {
             Listener = listener;
-        }
-
-        private string EncryptMessage(Client reciepent, string message) {
-            throw new NotImplementedException();
-        }
-
-        private string EncryptGroupMessage(Group reciepent, string message) {
-            throw new NotImplementedException();
         }
     }
 }

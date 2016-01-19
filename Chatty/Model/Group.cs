@@ -3,7 +3,8 @@
 namespace Chatty.Model
 {
     public class Group {
-        public string GroupId { get; set; }
+        public string GroupName { get; set; }
+        public string Identifier { get; set; }
         public List<Client> ClientList { get; set; }
     }
 }
