@@ -72,7 +72,6 @@ io.on('connection', function(socket)
     {
       clientArray.splice(clientIndex, 1)
     }
-    clientArray.remove(client)
   })
 
   socket.on('message', function(msgData)
