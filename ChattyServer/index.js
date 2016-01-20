@@ -96,8 +96,8 @@ io.on('connection', function(socket)
 
   socket.on('user-confirm', function(hashString)
   {
-    clientPublicKey = getClientByHash(hashString).publicKey
-    socket.emit('user-confirm', clientPublicKey)
+    client = getClientByHash(hashString)
+    socket.emit('user-confirm',  { publicKey: client.publicKey, userName: client.userName })
   })
 
   socket.on('create-group', function(groupData)
