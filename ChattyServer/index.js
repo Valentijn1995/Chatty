@@ -9,7 +9,7 @@ clientArray = []
 function getClientByHash(hashString)
 {
   return_client = false
-  array.foreach(function(client)
+  clientArray.foreach(function(client)
   {
     if(client.publicKeyHash == hashString)
     {
@@ -22,7 +22,7 @@ function getClientByHash(hashString)
 function getClientBySocket(client_socket)
 {
   return_client = false
-  array.foreach(function(client)
+  clientArray.foreach(function(client)
   {
     if(client.socket == client_socket)
     {
@@ -75,10 +75,24 @@ io.on('connection', function(socket)
   {
     console.log('Message received')
     client = getClientBySocket(socket)
-    receiver = getClientByHash(msgData.receiver)
-    msgTimeStamp = new Date.getTime()
-    emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
-    receiver.emit('message', emitMessage)
+    if(client !== false)
+    {
+      receiver = getClientByHash(msgData.receiver)
+      if(receiver !== false)
+      {
+        msgTimeStamp = new Date.getTime()
+        emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
+        receiver.emit('message', emitMessage)
+      }
+      else
+      {
+          console.log("Message received form " + client.userName + " but the receiver is not known")
+      }
+    }
+    else
+    {
+        console.log("Message received from unregisted client")
+    }
   })
 
   socket.on('user-search', function(searchName)
@@ -97,7 +111,15 @@ io.on('connection', function(socket)
   socket.on('user-confirm', function(hashString)
   {
     client = getClientByHash(hashString)
-    socket.emit('user-confirm',  { publicKey: client.publicKey, userName: client.userName })
+    if(client !== false)
+    {
+      socket.emit('user-confirm',  { publicKey: client.publicKey, userName: client.userName })
+    }
+    else
+    {
+        console.log("Could not find user with hash:" + hashString)
+        socket.emit('user-confirm')
+    }
   })
 
   socket.on('create-group', function(groupData)
@@ -108,8 +130,15 @@ io.on('connection', function(socket)
     groupData.members.foreach(function(clientHash)
     {
       client = getClientByHash(clientHash)
-      memberList.push(client)
-      memberMessage.push({ userName: client.userName, publicKey: client.publicKey })
+      if(client !== false)
+      {
+        memberList.push(client)
+        memberMessage.push({ userName: client.userName, publicKey: client.publicKey })
+      }
+      else
+      {
+          console.log("Client with hash '" + clientHash + "' could not be added to group " + groupData.groupName)
+      }
     })
 
     memberList.foreach(function(member)
