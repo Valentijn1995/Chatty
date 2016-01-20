@@ -23,9 +23,17 @@ namespace Chatty
             window.ProfileSelected += Window_ProfileSelected;
             window.ShowDialog();
 
-            _manager = new UserManager();    
+            _manager = new UserManager();
         }
-        
+
+        private void Connect(string adress = "http://localhost:3000") {
+            _client = new ChattyClient(adress);
+            _client.OnMessageReceived += Listener_OnMessageReceived;
+            _client.OnUserConfirm += Listener_OnUserConfirm;
+            _client.OnGroupJoined += Listener_OnGroupJoined;
+            _client.Register(_user.UserName, _user.PublicKey);
+        }
+
         #region Events
 
         private void Listener_OnGroupJoined(object sender, GroupJoinedEventArgs e) {
@@ -84,14 +92,8 @@ namespace Chatty
 
         #endregion Events
 
-        private void Connect(string adress = "http://localhost:3000") {
-            _client = new ChattyClient(adress);
-            _client.OnMessageReceived += Listener_OnMessageReceived;
-            _client.OnUserConfirm += Listener_OnUserConfirm;
-            _client.OnGroupJoined += Listener_OnGroupJoined;
-            _client.Register(_user.UserName, _user.PublicKey);
-        }
-        
+        #region GUI Helpers
+
         private void Highlight(string identifier, bool value) {
             foreach(object item in listView_Clients.Items) {
                 if((item as ChatItem).Identifier == identifier) {
@@ -106,7 +108,9 @@ namespace Chatty
             }
             return false;
         }
-        
+
+        #endregion GUI Helpers
+
         private void SaveMessage(string identifier, string message, long timeStamp) {
             if(_openMessages == null)
                 _openMessages = new Dictionary<string, List<Message>>();
