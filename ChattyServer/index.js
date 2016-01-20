@@ -2,14 +2,12 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var crypto = require('crypto')
-var shaHash = crypto.createHash('sha1')
 
-clientArray = []
-lastPublicKey = ""
+var clientArray = []
 
 function getClientByHash(hashString)
 {
-  return_client = false
+  var return_client = false
   clientArray.forEach(function(client)
   {
     if(client.publicKeyHash == hashString)
@@ -22,7 +20,7 @@ function getClientByHash(hashString)
 
 function getClientBySocket(client_socket)
 {
-  return_client = false
+  var return_client = false
   clientArray.forEach(function(client)
   {
     if(client.socket == client_socket)
@@ -54,12 +52,9 @@ io.on('connection', function(socket)
     }
     else
     {
-        if(regData.publicKey !== lastPublicKey)
-        {
-          shaHash.update(regData.publicKey)
-          lastPublicKey = regData.publicKey
-        }
-        publicKeyHash = shaHash.digest('hex')
+        var shaHash = crypto.createHash('sha1')
+        shaHash.update(regData.publicKey)
+        var publicKeyHash = shaHash.digest('hex')
         regData.publicKeyHash = publicKeyHash
         regData.socket = socket
         clientArray.push(regData)
@@ -70,11 +65,11 @@ io.on('connection', function(socket)
 
   socket.on('disconnect', function()
   {
-    client  = getClientBySocket(socket)
+    var client  = getClientBySocket(socket)
     if(client !== false)
     {
       console.log('User ' + client.userName + ' disconnected')
-      clientIndex = clientArray.indexOf(client)
+      var clientIndex = clientArray.indexOf(client)
       if(clientIndex > -1)
       {
         clientArray.splice(clientIndex, 1)
@@ -85,14 +80,14 @@ io.on('connection', function(socket)
   socket.on('message', function(msgData)
   {
     console.log('Message received')
-    client = getClientBySocket(socket)
+    var client = getClientBySocket(socket)
     if(client !== false)
     {
-      receiver = getClientByHash(msgData.receiver)
+      var receiver = getClientByHash(msgData.receiver)
       if(receiver !== false)
       {
-        msgTimeStamp = new Date.getTime()
-        emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
+        var msgTimeStamp = new Date.getTime()
+        var emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
         receiver.emit('message', emitMessage)
       }
       else
@@ -108,7 +103,7 @@ io.on('connection', function(socket)
 
   socket.on('user-search', function(searchName)
   {
-    results = []
+    var results = []
     clientArray.forEach(function(client)
     {
       if(client.userName.indexof(searchName) != -1)
@@ -121,7 +116,7 @@ io.on('connection', function(socket)
 
   socket.on('user-confirm', function(hashString)
   {
-    client = getClientByHash(hashString)
+    var client = getClientByHash(hashString)
     if(client !== false)
     {
       socket.emit('user-confirm',  { publicKey: client.publicKey, userName: client.userName })
@@ -135,12 +130,12 @@ io.on('connection', function(socket)
 
   socket.on('create-group', function(groupData)
   {
-    memberList = []
-    memberMessage = []
+    var memberList = []
+    var memberMessage = []
 
     groupData.members.forEach(function(clientHash)
     {
-      client = getClientByHash(clientHash)
+      var client = getClientByHash(clientHash)
       if(client !== false)
       {
         memberList.push(client)
