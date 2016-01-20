@@ -9,7 +9,7 @@ clientArray = []
 function getClientByHash(hashString)
 {
   return_client = false
-  clientArray.foreach(function(client)
+  clientArray.forEach(function(client)
   {
     if(client.publicKeyHash == hashString)
     {
@@ -22,7 +22,7 @@ function getClientByHash(hashString)
 function getClientBySocket(client_socket)
 {
   return_client = false
-  clientArray.foreach(function(client)
+  clientArray.forEach(function(client)
   {
     if(client.socket == client_socket)
     {
@@ -31,7 +31,6 @@ function getClientBySocket(client_socket)
   })
   return return_client
 }
-
 
 app.get('/', function(req, res)
 {
@@ -44,9 +43,9 @@ io.on('connection', function(socket)
 
   socket.on('register', function(regData)
   {
-    if(!('nickName' in regData))
+    if(!('userName' in regData))
     {
-      socket.emit('register-failed', 'Register data is missing a nickName property')
+      socket.emit('register-failed', 'Register data is missing a userName property')
     }
     else if (!('publicKey' in regData))
     {
@@ -68,6 +67,11 @@ io.on('connection', function(socket)
   {
     client  = getClientBySocket(socket)
     console.log('User ' + client.userName + ' disconnected')
+    clientIndex = clientArray.indexof(client)
+    if(clientIndex > -1)
+    {
+      clientArray.splice(clientIndex, 1)
+    }
     clientArray.remove(client)
   })
 
@@ -98,7 +102,7 @@ io.on('connection', function(socket)
   socket.on('user-search', function(searchName)
   {
     results = []
-    clientArray.foreach(function(client)
+    clientArray.forEach(function(client)
     {
       if(client.userName.indexof(searchName) != -1)
       {
@@ -127,7 +131,7 @@ io.on('connection', function(socket)
     memberList = []
     memberMessage = []
 
-    groupData.members.foreach(function(clientHash)
+    groupData.members.forEach(function(clientHash)
     {
       client = getClientByHash(clientHash)
       if(client !== false)
@@ -141,7 +145,7 @@ io.on('connection', function(socket)
       }
     })
 
-    memberList.foreach(function(member)
+    memberList.forEach(function(member)
     {
       member.socket.emit('joined-group', { groupName: groupData.groupName, members: memberMessage })
     })
