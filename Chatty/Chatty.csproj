@@ -72,7 +72,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="IOManager.cs" />
+    <Compile Include="Model\ChattyEventArgs.cs" />
+    <Compile Include="Model\ChattyJson.cs" />
+    <Compile Include="ProfileManager.cs" />
     <Compile Include="Model\ChatHistory.cs" />
     <Compile Include="Model\User.cs" />
     <Compile Include="SearchWindow.xaml.cs">
@@ -88,8 +90,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ChattyClient.cs" />
-    <Compile Include="SettingsWindow.xaml.cs">
-      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    <Compile Include="UserWindow.xaml.cs">
+      <DependentUpon>UserWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserManager.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -100,7 +102,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SettingsWindow.xaml">
+    <Page Include="UserWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -109,10 +111,8 @@
     <Compile Include="Model\Client.cs" />
     <Compile Include="Model\INotify\ChatItem.cs" />
     <Compile Include="Model\Group.cs" />
-    <Compile Include="Model\IMessageListener.cs" />
     <Compile Include="Model\INotify\PropChangedObservableCollection.cs" />
     <Compile Include="Model\INotify\Message.cs" />
-    <Compile Include="Model\SocketIOListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

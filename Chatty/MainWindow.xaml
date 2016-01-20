@@ -12,25 +12,32 @@
             <ColumnDefinition Width="80*"/>
         </Grid.ColumnDefinitions>
 
-        <ListView x:Name="listView_Clients" Grid.Column="0" Margin="3">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn/>
-                </GridView>
-            </ListView.View>
-            <ListView.ItemContainerStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Highlighted}" Value="False">
-                            <Setter Property="Foreground" Value="Black" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Highlighted}" Value="True">
-                            <Setter Property="Foreground" Value="Red" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="90*"/>
+                <RowDefinition Height="10*"/>
+            </Grid.RowDefinitions>
+            <ListView x:Name="listView_Clients" Grid.Row="0" Margin="3">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn/>
+                    </GridView>
+                </ListView.View>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Highlighted}" Value="False">
+                                <Setter Property="Foreground" Value="Black" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Highlighted}" Value="True">
+                                <Setter Property="Foreground" Value="Red" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+            <Button Grid.Row="1" Content="Create chat" Margin="3,3,3,3" Click="Button_Create_Click"/>
+        </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="90*"/>

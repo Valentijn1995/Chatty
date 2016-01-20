@@ -18,19 +18,14 @@ namespace Chatty
 
         public MainWindow() {
             InitializeComponent();
+            
+            UserWindow window = new UserWindow();
+            window.ProfileSelected += Window_ProfileSelected;
+            window.ShowDialog();
 
-            _user = InitializeUser(1);
-
-            _client = new ChattyClient();
-            _client.SetMessageListener(new SocketIOListener("http://localhost:3000/"));
-            _client.Listener.OnMessageReceived += Listener_OnMessageReceived;
-            _client.Listener.OnUserConfirm += Listener_OnUserConfirm;
-            _client.Listener.OnGroupJoined += Listener_OnGroupJoined;
-            _client.Register(_user.UserName, _user.PublicKey);       
-
-            _manager = new UserManager();
+            _manager = new UserManager();    
         }
-
+        
         #region Events
 
         private void Listener_OnGroupJoined(object sender, GroupJoinedEventArgs e) {
@@ -64,8 +59,6 @@ namespace Chatty
         }
 
         private void Button_Send_Click(object sender, RoutedEventArgs e) {
-
-            _client.SendMessage("PK", "Roy");
             if (listView_Chat.ItemsSource != null) {
                 string message = Textbox_Message.Text;
                 if (IsCurrentChatGroup()) {
@@ -79,15 +72,24 @@ namespace Chatty
             }
         }
 
+        private void Button_Create_Click(object sender, RoutedEventArgs e) {
+            //TODO Show SearchWindow
+        }
+
+
+        private void Window_ProfileSelected(object sender, ProfileSelectedArgs e) {
+            _user = e.Profile;
+            Connect();
+        }
+
         #endregion Events
 
-        private User InitializeUser(int id) {
-            User user = IOManager.GetUserInfo(id);
-            while(user == null) {
-                new SettingsWindow().ShowDialog();
-                user = IOManager.GetUserInfo(id);
-            }
-            return user;
+        private void Connect(string adress = "http://localhost:3000") {
+            _client = new ChattyClient(adress);
+            _client.OnMessageReceived += Listener_OnMessageReceived;
+            _client.OnUserConfirm += Listener_OnUserConfirm;
+            _client.OnGroupJoined += Listener_OnGroupJoined;
+            _client.Register(_user.UserName, _user.PublicKey);
         }
         
         private void Highlight(string identifier, bool value) {

@@ -12,11 +12,13 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Chatty {
+namespace Chatty
+{
     /// <summary>
     /// Interaction logic for SearchWindow.xaml
     /// </summary>
-    public partial class SearchWindow : Window {
+    public partial class SearchWindow : Window
+    {
         public SearchWindow() {
             InitializeComponent();
         }
