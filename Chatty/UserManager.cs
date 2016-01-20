@@ -29,7 +29,7 @@ namespace Chatty
                 _groupList = new List<Group>();
 
             _groupList.Add(group);
-            AddChatHistory(group.Identifier, true);
+            AddChatHistory(group.GroupHash, true);
         }
 
         public Group GetGroup(string clientIdentifier) {
@@ -46,7 +46,7 @@ namespace Chatty
             if(_chatHistories == null)
                 _chatHistories = new Dictionary<string, ChatHistory>();
 
-            _chatHistories.Add(identifier, new ChatHistory() { IsGroup = isGroup });
+            _chatHistories.Add(identifier, new ChatHistory() { IsGroup = isGroup, Identifier = identifier });
         }
 
         public ChatHistory GetChatHistory(string identifier) {

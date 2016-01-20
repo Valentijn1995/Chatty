@@ -7,6 +7,7 @@ namespace Chatty.Model
     public class ChatHistory : PropChangeObservableCollection<Message>
     {
         public bool IsGroup { get; set; }
+        public string Identifier { get; set; }
 
         internal void PushMessage(string message, string username, long timeStamp) {
             PushMessage(message, username, new DateTime(timeStamp));

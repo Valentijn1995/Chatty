@@ -1,6 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Quobject.SocketIoClientDotNet.Client;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Chatty.Model
 {
@@ -11,60 +14,76 @@ namespace Chatty.Model
         public event EventHandler<GroupJoinedEventArgs> OnGroupJoined;
         public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
-        private SocketIOClient.Client _socket;
+        private Socket _socket;
 
         public SocketIOListener(string adress) {
-            //Initialize(adress);
+            Initialize(adress);
         }
 
         public void Initialize(string adress) {
-            _socket = new SocketIOClient.Client(adress);
+            _socket = IO.Socket("http://localhost:3000/");
             
             _socket.On("register-accepted", (data) => {
                 Console.WriteLine("Succesfull connected with Server");
             });
             _socket.On("register-failed", (data) => {
-                string errorMessage = data.MessageText;
+                string errorMessage = data.ToString();
                 Console.WriteLine("Failed to connected with Server: {0}", errorMessage);
             });
             _socket.On("message", (data) => {
-                var message = JsonConvert.DeserializeObject<JsonReceivedMessage>(data.Json.ToJsonString());
+                var message = JsonConvert.DeserializeObject<JsonReceivedMessage>(data.ToString());
                 OnMessageReceived(null, new MessageReceivedEventArgs() { Identifier = message.Sender, Message = message.Message, TimeStamp = message.Timestamp });
             });
             _socket.On("user-search", (data) => {
-                List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(data.Json.ToJsonString());
+                List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(data.ToString());
                 OnUserSearch(null, new UserSearchEventArgs() { FoundMembers = clients });
             });
             _socket.On("user-confirm", (data) => {
-                string publicKey = data.MessageText;
-                OnUserConfirm(null, new UserComfirmEventArgs() { PublicKey = publicKey });
+                var client = JsonConvert.DeserializeObject<Client>(data.ToString());
+                OnUserConfirm(null, new UserComfirmEventArgs() { PublicKey = client.PublicKey, UserName = client.UserName });
             });
             _socket.On("joined-group", (data) => {
-                var message = JsonConvert.DeserializeObject<JsonJoinedGroup>(data.Json.ToJsonString());
-                OnGroupJoined(null, new GroupJoinedEventArgs() {  GroupName = message.GroupName, Members = message.Members });
+                var message = JsonConvert.DeserializeObject<JsonJoinedGroup>(data.ToString());
+                OnGroupJoined(null, new GroupJoinedEventArgs() {  GroupName = message.GroupName, Members = message.Members, GroupHash = message.GroupHash });
             });
 
             _socket.Connect();
         }
 
-        public void Close() {
+        public void Disconnect() {
             if(_socket != null)
-                _socket.Dispose(); 
+                _socket.Disconnect(); 
         }
 
+        public void Register(string username, string publicKey) {
+            if (_socket != null)
+                _socket.Emit("register", JObject.FromObject(new JsonConnectUser() { UserName = username, PublicKey = publicKey }));
+        }
+        
         public void SendMessage(string identifier, string message) {
             if(_socket != null)
-                _socket.Emit("message", new JsonSendMessage() { ReceiverIdentifier = identifier, Message = message });
+                _socket.Emit("message", JObject.FromObject(new JsonSendMessage() { ReceiverIdentifier = identifier, Message = message }));
         }
 
         public void SendMessage(List<string> receivers, string message) {
-            if (_socket == null)
+            if (_socket != null)
                 receivers.ForEach(receiver => { SendMessage(receiver, message); });
         }
 
         public void ConfirmUser(string identifier) {
-            if(_socket == null)
+            if(_socket != null)
                 _socket.Emit("comfirm-user", identifier);
+        }
+
+        public void SearchUser(string userName) {
+            if (_socket != null)
+                _socket.Emit("user-search", userName);
+        }
+
+        public void CreateGroup(string groupName, List<Client> members) 
+        {
+            if (_socket != null)
+                _socket.Emit("create-group", JObject.FromObject(new JsonCreateGroup() { GroupName = groupName, Members = members.Select(member => member.PublicKeyHash).ToList() }));
         }
     }
 
@@ -85,6 +104,14 @@ namespace Chatty.Model
         public long Timestamp { get; set; }
     }
 
+    [Serializable]
+    class JsonConnectUser {
+        [JsonProperty("userName")]
+        public string UserName { get; set; }
+        [JsonProperty("publicKey")]
+        public string PublicKey { get; set; }
+    }
+
     class JsonCreateGroup {
         [JsonProperty("groupName")]
         public string GroupName { get; set; }
@@ -95,6 +122,8 @@ namespace Chatty.Model
     class JsonJoinedGroup {
         [JsonProperty("groupName")]
         public string GroupName { get; set; }
+        [JsonProperty("groupHash")]
+        public string GroupHash { get; set; }
         [JsonProperty("members")]
         public List<Model.Client> Members { get; set; }
     }
