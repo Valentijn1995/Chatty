@@ -64,7 +64,7 @@ io.on('connection', function(socket)
     {
       socket.emit('register-failed', 'Register data is missing a publicKey property')
     }
-    else if (getClientByPublicKey() !== false)
+    else if (getClientByPublicKey(regData.publickey) !== false)
     {
       socket.emit('register-failed', 'There is already a user registered with this publickey')
     }
@@ -75,6 +75,7 @@ io.on('connection', function(socket)
         var publicKeyHash = shaHash.digest('hex')
         regData.publicKeyHash = publicKeyHash
         regData.socket = socket
+        regData.online = true
         clientArray.push(regData)
         socket.emit('register-accepted')
         console.log('New client registered! Name: ' + regData.userName )
@@ -102,15 +103,16 @@ io.on('connection', function(socket)
     if(client !== false)
     {
       var receiver = getClientByHash(msgData.receiver)
+      var msgTimeStamp = new Date.getTime()
+      var emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
       if(receiver !== false)
       {
-        var msgTimeStamp = new Date.getTime()
-        var emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
-        receiver.emit('message', emitMessage)
+          receiver.emit('message', emitMessage)
       }
       else
       {
           console.log("Message received form " + client.userName + " but the receiver is not known")
+
       }
     }
     else
