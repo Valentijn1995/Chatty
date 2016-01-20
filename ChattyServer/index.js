@@ -5,6 +5,7 @@ var crypto = require('crypto')
 var shaHash = crypto.createHash('sha1')
 
 clientArray = []
+lastPublicKey = ""
 
 function getClientByHash(hashString)
 {
@@ -53,7 +54,11 @@ io.on('connection', function(socket)
     }
     else
     {
-        shaHash.update(regData.publicKey)
+        if(regData.publicKey !== lastPublicKey)
+        {
+          shaHash.update(regData.publicKey)
+          lastPublicKey = regData.publicKey
+        }
         publicKeyHash = shaHash.digest('hex')
         regData.publicKeyHash = publicKeyHash
         regData.socket = socket
@@ -66,11 +71,14 @@ io.on('connection', function(socket)
   socket.on('disconnect', function()
   {
     client  = getClientBySocket(socket)
-    console.log('User ' + client.userName + ' disconnected')
-    clientIndex = clientArray.indexof(client)
-    if(clientIndex > -1)
+    if(client !== false)
     {
-      clientArray.splice(clientIndex, 1)
+      console.log('User ' + client.userName + ' disconnected')
+      clientIndex = clientArray.indexOf(client)
+      if(clientIndex > -1)
+      {
+        clientArray.splice(clientIndex, 1)
+      }
     }
   })
 
