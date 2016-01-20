@@ -5,6 +5,7 @@
   "dependencies": {
     "crypto": "0.0.3",
     "express": "^4.10.2",
-    "socket.io": "^1.4.4"
+    "socket.io": "^1.4.4",
+    "sqlite3": "^3.1.1"
   }
 }

@@ -2,33 +2,47 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var crypto = require('crypto')
+var sqlite = require('sqlite3')
 
 var clientArray = []
 
 function getClientByHash(hashString)
 {
-  var return_client = false
+  var returnClient = false
   clientArray.forEach(function(client)
   {
     if(client.publicKeyHash == hashString)
     {
-      return_client = client
+      returnClient = client
     }
   })
-  return return_client
+  return returnClient
 }
 
-function getClientBySocket(client_socket)
+function getClientBySocket(clientSocket)
 {
-  var return_client = false
+  var returnClient = false
   clientArray.forEach(function(client)
   {
-    if(client.socket == client_socket)
+    if(client.socket == clientSocket)
     {
-      return_client = client
+      returnClient = client
     }
   })
-  return return_client
+  return returnClient
+}
+
+function getClientByPublicKey(clientPublicKey)
+{
+  var returnClient = false
+  clientArray.forEach(function(client)
+  {
+    if(client.publicKey == clientPublicKey)
+    {
+      returnClient = client
+    }
+  })
+  return returnClient
 }
 
 app.get('/', function(req, res)
@@ -49,6 +63,10 @@ io.on('connection', function(socket)
     else if (!('publicKey' in regData))
     {
       socket.emit('register-failed', 'Register data is missing a publicKey property')
+    }
+    else if (getClientByPublicKey() !== false)
+    {
+      socket.emit('register-failed', 'There is already a user registered with this publickey')
     }
     else
     {
@@ -154,6 +172,8 @@ io.on('connection', function(socket)
     console.log('New group created with the name ' + groupData.groupName)
   })
 })
+
+
 
 http.listen(3000,'localhost', function()
 {
