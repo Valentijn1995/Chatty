@@ -8,7 +8,8 @@ namespace Chatty.Model
         public string Message { get; set; }
         public long TimeStamp { get; set; }
         public string Identifier { get; set; }
-        public bool GroupMessage { get; set; }
+        public string GroupHash { get; set; }   //TODO Implement on server
+        public bool GroupMessage => GroupHash != null && GroupHash.Length > 0;
     }
 
     public class UserSearchEventArgs : EventArgs
@@ -16,7 +17,7 @@ namespace Chatty.Model
         public List<Client> FoundMembers { get; set; }
     }
 
-    public class UserComfirmEventArgs : EventArgs
+    public class UserConfirmEventArgs : EventArgs
     {
         public string UserName { get; set; }
         public string PublicKey { get; set; }

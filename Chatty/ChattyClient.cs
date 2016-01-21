@@ -8,17 +8,13 @@ using System.Linq;
 
 namespace Chatty
 {
-    class ChattyClient {
+    public class ChattyClient {
         public event EventHandler<UserSearchEventArgs> OnUserSearch;
-        public event EventHandler<UserComfirmEventArgs> OnUserConfirm;
+        public event EventHandler<UserConfirmEventArgs> OnUserConfirm;
         public event EventHandler<GroupJoinedEventArgs> OnGroupJoined;
         public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
         private Socket _socket;
-
-        public ChattyClient(string adress) {
-            Initialize(adress);
-        }
 
         public void Initialize(string adress) {
             _socket = IO.Socket("http://localhost:3000/");
@@ -32,19 +28,19 @@ namespace Chatty
             });
             _socket.On("message", (data) => {
                 var message = JsonConvert.DeserializeObject<JsonReceivedMessage>(data.ToString());
-                OnMessageReceived(null, new MessageReceivedEventArgs() { Identifier = message.Sender, Message = message.Message, TimeStamp = message.Timestamp });
+                OnMessageReceived(this, new MessageReceivedEventArgs() { Identifier = message.Sender, Message = message.Message, TimeStamp = message.Timestamp });
             });
             _socket.On("user-search", (data) => {
                 List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(data.ToString());
-                OnUserSearch(null, new UserSearchEventArgs() { FoundMembers = clients });
+                OnUserSearch(this, new UserSearchEventArgs() { FoundMembers = clients });
             });
             _socket.On("user-confirm", (data) => {
                 var client = JsonConvert.DeserializeObject<Client>(data.ToString());
-                OnUserConfirm(null, new UserComfirmEventArgs() { PublicKey = client.PublicKey, UserName = client.UserName });
+                OnUserConfirm(this, new UserConfirmEventArgs() { PublicKey = client.PublicKey, UserName = client.UserName });
             });
             _socket.On("joined-group", (data) => {
                 var message = JsonConvert.DeserializeObject<JsonJoinedGroup>(data.ToString());
-                OnGroupJoined(null, new GroupJoinedEventArgs() { GroupName = message.GroupName, Members = message.Members, GroupHash = message.GroupHash });
+                OnGroupJoined(this, new GroupJoinedEventArgs() { GroupName = message.GroupName, Members = message.Members, GroupHash = message.GroupHash });
             });
 
             _socket.Connect();

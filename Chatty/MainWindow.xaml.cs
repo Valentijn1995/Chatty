@@ -17,51 +17,57 @@ namespace Chatty
         private Dictionary<string, List<Message>> _openMessages;
 
         public MainWindow() {
+            _client = new ChattyClient();
+            _manager = new UserManager();
+
             InitializeComponent();
             
             UserWindow window = new UserWindow();
-            window.ProfileSelected += Window_ProfileSelected;
+            window.ProfileSelected += OnProfileSelected;
             window.ShowDialog();
-
-            _manager = new UserManager();
         }
 
         private void Connect(string adress = "http://localhost:3000") {
-            _client = new ChattyClient(adress);
-            _client.OnMessageReceived += Listener_OnMessageReceived;
-            _client.OnUserConfirm += Listener_OnUserConfirm;
-            _client.OnGroupJoined += Listener_OnGroupJoined;
+            _client.Initialize(adress);
+            _client.OnMessageReceived += OnMessageReceived;
+            _client.OnUserConfirm += OnUserConfirm;
+            _client.OnGroupJoined += OnGroupJoined;
             _client.Register(_user.UserName, _user.PublicKey);
         }
 
         #region Events
 
-        private void Listener_OnGroupJoined(object sender, GroupJoinedEventArgs e) {
+        private void OnGroupJoined(object sender, GroupJoinedEventArgs e) {
             var group = new Group() { GroupHash = e.GroupName, ClientList = e.Members };
             _manager.AddGroup(group);
             listView_Clients.Items.Add(new ChatItem() { Identifier = group.GroupHash, Value = group.GroupName });
         }
 
-        private void Listener_OnUserConfirm(object sender, UserComfirmEventArgs e) {
+        private void OnUserConfirm(object sender, UserConfirmEventArgs e) {
             var client = new Client() { PublicKey = e.PublicKey, UserName = e.UserName };
             _manager.AddClient(client);
             listView_Clients.Items.Add(new ChatItem() { Identifier = client.PublicKeyHash, Value = client.UserName });
             _manager.GetChatHistory(client.PublicKeyHash).PushMessage(RetrieveMessages(client.PublicKeyHash), client.UserName);
         }
 
-        private void Listener_OnMessageReceived(object sender, MessageReceivedEventArgs e) {
-            if (e.GroupMessage && _manager.GetGroup(e.Identifier) != null) {
-                Client client = _manager.GetClient(e.Identifier);
-                _manager.GetChatHistory(e.Identifier).PushMessage(e.Message, client.UserName, e.TimeStamp);
-            }
-            else {
-                if (_manager.GetClient(e.Identifier) == null) {
-                    _client.ConfirmUser(e.Identifier);
-                    SaveMessage(e.Identifier, e.Message, e.TimeStamp);
-                }
-                else {
+        private void OnMessageReceived(object sender, MessageReceivedEventArgs e) {
+            if (e.GroupMessage) {
+                if(_manager.GetGroup(e.Identifier) != null) {                       //Known Group
                     Client client = _manager.GetClient(e.Identifier);
                     _manager.GetChatHistory(e.Identifier).PushMessage(e.Message, client.UserName, e.TimeStamp);
+                }
+                else {                                                              //Unkown Group
+                    //TODO Get group from server
+                }
+            }
+            else {
+                if (_manager.GetClient(e.Identifier) != null) {                     //Known Client
+                    Client client = _manager.GetClient(e.Identifier);
+                    _manager.GetChatHistory(e.Identifier).PushMessage(e.Message, client.UserName, e.TimeStamp);
+                }
+                else {                                                              //Unknown Client
+                    _client.ConfirmUser(e.Identifier);
+                    SaveMessage(e.Identifier, e.Message, e.TimeStamp);
                 }
             }
         }
@@ -81,11 +87,13 @@ namespace Chatty
         }
 
         private void Button_Create_Click(object sender, RoutedEventArgs e) {
-            //TODO Show SearchWindow
+            SearchWindow window = new SearchWindow(_client);
+            window.GroupCreated += OnGroupJoined;
+            window.PrivateChatCreated += OnUserConfirm;
+            window.ShowDialog();
         }
 
-
-        private void Window_ProfileSelected(object sender, ProfileSelectedArgs e) {
+        private void OnProfileSelected(object sender, ProfileSelectedArgs e) {
             _user = e.Profile;
             Connect();
         }

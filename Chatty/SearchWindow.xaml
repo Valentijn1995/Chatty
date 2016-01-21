@@ -12,39 +12,39 @@
                 <RowDefinition Height="90*"/>
                 <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
-            <ListView Grid.Row="0">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn/>
-                    </GridView>
-                </ListView.View>
+            <ListView x:Name="listView_results" Grid.Row="0" Margin="3">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding UserName}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListView>
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="75*"/>
                     <ColumnDefinition Width="25*"/>
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" TextWrapping="Wrap" Text="TextBox"/>
-                <Button Grid.Column="1" Content="Search"/>
+                <TextBox x:Name="Txtbox_Search" Grid.Column="0" Margin="3,0,0,3"/>
+                <Button x:Name="Btn_Search" Click="Btn_Search_Click" Grid.Column="1" Content="Search" Margin="3,0,3,3"/>
             </Grid>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="60*"/>
+                <RowDefinition Height="8*"/>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="46*"/>
+                <RowDefinition Height="10*"/>
                 <RowDefinition Height="10*"/>
                 <RowDefinition Height="10*"/>
                 <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
-            <ListView Grid.Row="0">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-            <Button Grid.Row="3" Content="Start group conversation"/>
-            <Button Grid.Row="2" Content="Add member"/>
-            <Button Grid.Row="1" Content="Start conversation"/>
+            <TextBlock Grid.Row="0" Text="Create group" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14.667" />
+            <TextBlock Grid.Row="1" Text="(Add members to group)" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <ListView x:Name="listView_group" Grid.Row="2" Margin="0,0,3,3" />
+            <Button x:Name="Btn_PrivateCon" Click="Btn_PrivateCon_Click" Grid.Row="3" Content="Start private conversation" Margin="0,0,3,3"/>
+            <Button x:Name="Btn_AddMember" Click="Btn_AddMember_Click" Grid.Row="4" Content="Add member" Margin="0,0,3,3"/>
+            <Button x:Name="Btn_RemoveMember" Click="Btn_RemoveMember_Click" Grid.Row="5" Content="Remove selected member" Margin="0,0,3,3"/>
+            <Button x:Name="Btn_GroupCon" Click="Btn_GroupCon_Click" Grid.Row="6" Content="Start group conversation" Margin="0,0,3,3"/>
         </Grid>
     </Grid>
 </Window>

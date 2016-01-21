@@ -31,7 +31,7 @@ namespace Chatty
 
         private void SelectProfile(User user) {
             if(ProfileSelected != null) {
-                ProfileSelected(null, new ProfileSelectedArgs() { Profile = user });
+                ProfileSelected(this, new ProfileSelectedArgs() { Profile = user });
                 this.Close();
             }
         }
