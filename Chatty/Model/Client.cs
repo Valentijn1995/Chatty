@@ -1,7 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Chatty.Model
 {
@@ -19,16 +16,11 @@ namespace Chatty.Model
                     if(PublicKey == null)
                         return null;
 
-                    _publicKeyHash = SHA1Hash(PublicKey);
+                    _publicKeyHash = SecurityManager.SHA1hash(PublicKey);
                 }
                 return _publicKeyHash;
             }
             set { _publicKeyHash = value; }
-        }
-
-        static string SHA1Hash(string input) {
-            var hash = (new SHA1Managed()).ComputeHash(Encoding.UTF8.GetBytes(input));
-            return string.Join("", hash.Select(b => b.ToString("x2")).ToArray());
         }
     }
 }

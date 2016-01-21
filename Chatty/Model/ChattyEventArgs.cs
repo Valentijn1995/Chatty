@@ -8,7 +8,7 @@ namespace Chatty.Model
         public string Message { get; set; }
         public long TimeStamp { get; set; }
         public string Identifier { get; set; }
-        public string GroupHash { get; set; }   //TODO Implement on server
+        public string GroupHash { get; set; } 
         public bool GroupMessage => GroupHash != null && GroupHash.Length > 0;
     }
 

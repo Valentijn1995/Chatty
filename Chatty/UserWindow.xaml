@@ -8,12 +8,12 @@
         Title="SettingsWindow" Height="400" Width="350" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="10*"/>
-            <RowDefinition Height="60*"/>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="78*"/>
             <RowDefinition Height="15*"/>
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="Existing profiles:" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13.333" />
-        <ListView x:Name="listView_Profiles" Grid.Row="1" MouseDoubleClick="listView_Profiles_MouseDoubleClick">
+        <ListView x:Name="listView_Profiles" Grid.Row="1" MouseDoubleClick="listView_Profiles_MouseDoubleClick" Margin="3,0" HorizontalContentAlignment="Center" FontSize="16">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding UserName}"/>
@@ -32,9 +32,9 @@
                     <ColumnDefinition Width="55*"/>
                     <ColumnDefinition Width="30*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Username:" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <TextBox x:Name="txtBox_Username" Grid.Column="1" />
-                <Button x:Name="btn_NewProfile" Click="btn_NewProfile_Click" Grid.Column="2" Content="Create" />
+                <TextBlock Grid.Column="0" Text="Username:" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,3" />
+                <TextBox x:Name="txtBox_Username" Grid.Column="1" Margin="0,0,0,3" />
+                <Button x:Name="btn_NewProfile" Click="btn_NewProfile_Click" Grid.Column="2" Content="Create" Margin="3,0,3,3" />
             </Grid>
         </Grid>
     </Grid>

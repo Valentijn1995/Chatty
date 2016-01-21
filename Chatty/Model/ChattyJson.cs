@@ -22,6 +22,8 @@ namespace Chatty.Model
         public string Message { get; set; }
         [JsonProperty("timestamp")]
         public long Timestamp { get; set; }
+        [JsonProperty("groupHash")]
+        public string GroupHash { get; set; }
     }
 
     [Serializable]

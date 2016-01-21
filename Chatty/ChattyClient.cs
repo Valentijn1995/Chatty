@@ -28,7 +28,7 @@ namespace Chatty
             });
             _socket.On("message", (data) => {
                 var message = JsonConvert.DeserializeObject<JsonReceivedMessage>(data.ToString());
-                OnMessageReceived(this, new MessageReceivedEventArgs() { Identifier = message.Sender, Message = message.Message, TimeStamp = message.Timestamp });
+                OnMessageReceived(this, new MessageReceivedEventArgs() { Identifier = message.Sender, Message = message.Message, TimeStamp = message.Timestamp, GroupHash = message.GroupHash });
             });
             _socket.On("user-search", (data) => {
                 List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(data.ToString());
@@ -56,18 +56,17 @@ namespace Chatty
                 _socket.Emit("register", JObject.FromObject(new JsonConnectUser() { UserName = username, PublicKey = publicKey }));
         }
 
-        public void SendMessage(string identifier, string message) {
+        private void SendMessage(string identifier, string message) {
             if(_socket != null)
                 _socket.Emit("message", JObject.FromObject(new JsonSendMessage() { ReceiverIdentifier = identifier, Message = message }));
         }
 
-        public void SendGroupMessage(Group group, string message) {
-            SendMessage(group.ClientList.Select(client => client.PublicKeyHash).ToList(), message);
+        public void SendMessage(Client client, string message) {
+            SendMessage(client.PublicKeyHash, SecurityManager.EncryptText(message, client.PublicKey));
         }
 
-        public void SendMessage(List<string> receivers, string message) {
-            if(_socket != null)
-                receivers.ForEach(receiver => { SendMessage(receiver, message); });
+        public void SendGroupMessage(Group group, string message) {
+            group.ClientList.ForEach(client => { SendMessage(client.PublicKeyHash, SecurityManager.EncryptText(message, client.PublicKey)); });
         }
 
         public void ConfirmUser(string identifier) {

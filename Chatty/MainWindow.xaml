@@ -5,7 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chatty"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Chatty" Height="350" Width="525">
+    <Window.Resources>
+        <Style x:Key="noHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20*"/>
@@ -14,56 +19,58 @@
 
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="90*"/>
+                <RowDefinition Height="7*"/>
+                <RowDefinition Height="83*"/>
                 <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
-            <ListView x:Name="listView_Clients" Grid.Row="0" Margin="3" MouseDoubleClick="listView_Clients_MouseDoubleClick">
+            <TextBlock Text="Active chats:" Grid.Row="0" Margin="5,3,0,3"/>
+            <ListView x:Name="listView_Clients" Grid.Row="1" Margin="3,0,0,3" MouseDoubleClick="listView_Clients_MouseDoubleClick">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Value}"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
                 <ListView.ItemContainerStyle>
-                    <Style TargetType="{x:Type ListBoxItem}">
+                    <Style TargetType="{x:Type ListViewItem}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Highlighted}" Value="False">
                                 <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="FontStyle" Value="Normal"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Highlighted}" Value="True">
                                 <Setter Property="Foreground" Value="Red" />
+                                <Setter Property="FontStyle" Value="Oblique"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </ListView.ItemContainerStyle>
             </ListView>
-            <Button Grid.Row="1" Content="Create chat" Margin="3,3,3,3" Click="Button_Create_Click"/>
+            <Button Content="Create chat" Margin="3,0,0,3" Grid.Row="2" Click="Button_Search_Click"/>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="90*"/>
+                <RowDefinition Height="7*"/>
+                <RowDefinition Height="83*"/>
                 <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
-
-            <ListView x:Name="listView_Chat" Grid.Row="0" Margin="3">
+            <TextBlock x:Name="Label_Chatname" Grid.Row="0" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <ListView x:Name="listView_Chat" Grid.Row="1" Margin="3,0,3,3" >
                 <ListView.View>
-                    <GridView>
-                        <GridViewColumn Width="140" Header="Timestamp"
-         DisplayMemberBinding="{Binding TimeStamp}"  />
-                        <GridViewColumn Width="140" Header="Username"  
-         DisplayMemberBinding="{Binding Username}" />
-                        <GridViewColumn Width="140" Header="Message"
-         DisplayMemberBinding="{Binding MessageString}" />
+                    <GridView ColumnHeaderContainerStyle="{StaticResource noHeaderStyle}">
+                        <GridViewColumn Width="40" Header="Time" DisplayMemberBinding="{Binding TimeString}"  />
+                        <GridViewColumn Width="80" Header="Username" DisplayMemberBinding="{Binding Username}" />
+                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding MessageString}" />
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80*"/>
                     <ColumnDefinition Width="20*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox x:Name="Textbox_Message" Grid.Column="0" Margin="3"/>
-                <Button Grid.Column="1" Content="Send" Margin="0,3,3,3" Click="Button_Send_Click"/>
+                <TextBox x:Name="Textbox_Message" Grid.Column="0" Margin="3,0,0,3"/>
+                <Button Grid.Column="1" Content="Send" Margin="3,0,3,3" Click="Button_Send_Click"/>
             </Grid>
         </Grid>
     </Grid>

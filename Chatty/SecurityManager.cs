@@ -1,20 +1,20 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Chatty
 {
-    [Serializable]
-    public class KeyPair {
-        public string PublicKey { get; set; }
-        public string PrivateKey { get; set; }
-    }
-
     public static class SecurityManager {
         private static bool _optimalAsymmetricEncryptionPadding = false;
 
-        public static KeyPair GenerateKeys(int keySize) {
-            if (keySize % 2 != 0 || keySize < 512)
+        public static string SHA1hash(string input) {
+            var hash = (new SHA1Managed()).ComputeHash(Encoding.UTF8.GetBytes(input));
+            return string.Join("", hash.Select(b => b.ToString("x2")).ToArray());
+        }
+
+        public static KeyPair GenerateKeys(int keySize = 512) {
+            if (!IsKeySizeValid(keySize))
                 throw new Exception("Key should be multiple of two and greater than 512.");
 
             var response = new KeyPair();
@@ -74,9 +74,15 @@ namespace Chatty
         }
 
         private static byte[] Decrypt(byte[] data, int keySize, string publicAndPrivateKeyXml) {
-            if(data == null || data.Length == 0) throw new ArgumentException("Data are empty", nameof(data));
-            if (!IsKeySizeValid(keySize)) throw new ArgumentException("Key size is not valid", nameof(keySize));
-            if (String.IsNullOrEmpty(publicAndPrivateKeyXml)) throw new ArgumentException("Key is null or empty", nameof(publicAndPrivateKeyXml));
+            if(data == null || data.Length == 0)
+                throw new ArgumentException("Data are empty", nameof(data));
+
+            if (!IsKeySizeValid(keySize))
+                throw new ArgumentException("Key size is not valid", nameof(keySize));
+
+            if (string.IsNullOrEmpty(publicAndPrivateKeyXml))
+                throw new ArgumentException("Key is null or empty", nameof(publicAndPrivateKeyXml));
+
             using(var provider = new RSACryptoServiceProvider(keySize)) {
                 provider.FromXmlString(publicAndPrivateKeyXml);
                 return provider.Decrypt(data, _optimalAsymmetricEncryptionPadding);
@@ -115,6 +121,13 @@ namespace Chatty
                 }
             }
         }
+    }
+
+    [Serializable]
+    public class KeyPair
+    {
+        public string PublicKey { get; set; }
+        public string PrivateKey { get; set; }
     }
 }
 

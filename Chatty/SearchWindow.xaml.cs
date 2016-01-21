@@ -38,6 +38,8 @@ namespace Chatty
             if(searchValue != null && searchValue.Length > 0) {
                 _client.SearchUser(searchValue);
             }
+
+            listView_results.Items.Clear();
         }
 
         private void Btn_PrivateCon_Click(object sender, RoutedEventArgs e) {
@@ -54,7 +56,7 @@ namespace Chatty
             if(listView_results.SelectedItems != null && listView_results.SelectedItems.Count > 0) {
                 foreach(var item in listView_results.SelectedItems) {
                     OnDispatcher(new Action(() => {
-                        listView_results.Items.Add(item as Client);
+                        listView_group.Items.Add(item as Client);
                     }));
                 }
             }
@@ -77,10 +79,10 @@ namespace Chatty
 
             if(listView_group.Items.Count > 1 && GroupCreated != null) {
                 List<Client> clients = new List<Client>();
-                foreach(var item in listView_group.SelectedItems) {
+                foreach(var item in listView_group.Items) {
                     clients.Add(item as Client);
                 }
-                GroupCreated(this, new GroupJoinedEventArgs() { GroupName = groupName, Members = clients });   //TODO Add groupname
+                GroupCreated(this, new GroupJoinedEventArgs() { GroupName = groupName, Members = clients });
                 this.Close();
             }
         }
