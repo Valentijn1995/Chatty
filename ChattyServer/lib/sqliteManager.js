@@ -17,7 +17,7 @@ SqliteManager.prototype.createTableIfNeeded = function()
 
 SqliteManager.prototype.saveMessage = function(receiverHash, message)
 {
-  if('groupHash' in message)
+  if(!('groupHash' in message))
   {
     message.groupHash = ''
   }
