@@ -4,12 +4,28 @@ var io = require('socket.io')(http);
 var crypto = require('crypto')
 
 var ClientList = require('./lib/clientList')
+var GroupList = require('./lib/groupList')
 var SqliteManager = require('./lib/sqliteManager')
 
-var listenAddress = '192.168.2.167'
+var listenAddress = 'localhost'
 var listenPort = 3000
 var clientList = new ClientList()
+var groupList = new GroupList()
 var dbManager = new SqliteManager('messages.db')
+
+
+function createHash(stringToHash)
+{
+  var shaHash = crypto.createHash('sha1')
+  shaHash.update(stringToHash)
+  var hash = shaHash.digest('hex')
+  return hash
+}
+
+function createTimestamp()
+{
+  return new Date().getTime()
+}
 
 app.get('/', function(req, res)
 {
@@ -43,11 +59,20 @@ io.on('connection', function(socket)
         client.socket = socket
         socket.emit('register-accepted')
         console.log('Client ' + client.userName + ' just came online!')
+        var joinedGroups = groupList.getGroupsOfClient(client)
+        joinedGroups.forEach(function(group)
+        {
+          socket.emit('joined-group', group)
+        })
+
         dbManager.getSavedMessages(client.publicKeyHash, function(savedMessages)
         {
           savedMessages.forEach(function(message)
           {
-            socket.emit('message', message)
+            if(('groupHash' in message) && groupList.groupExists(message.groupHash))
+            {
+              socket.emit('message', message)
+            }
           })
         })
         /*
@@ -75,9 +100,7 @@ io.on('connection', function(socket)
     }
     else
     {
-        var shaHash = crypto.createHash('sha1')
-        shaHash.update(regData.publicKey)
-        var publicKeyHash = shaHash.digest('hex')
+        var publicKeyHash = createHash(regData.publicKey)
         regData.publicKeyHash = publicKeyHash
         regData.socket = socket
         regData.online = true
@@ -105,7 +128,7 @@ io.on('connection', function(socket)
     if(client !== false)
     {
       var receiver = clientList.getClientByHash(msgData.receiver)
-      var msgTimeStamp = new Date.getTime()
+      var msgTimeStamp = createTimestamp()
       var emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
       if('groupHash' in msgData)
       {
@@ -139,7 +162,7 @@ io.on('connection', function(socket)
     var results = []
     clientList.innerList.forEach(function(client)
     {
-      if(client.userName.indexof(searchName) != -1)
+      if(client.userName.indexOf(searchName) != -1)
       {
         results.push({ userName: client.userName, publicKeyHash: client.publicKeyHash })
       }
@@ -184,6 +207,11 @@ io.on('connection', function(socket)
     {
       member.socket.emit('joined-group', { groupName: groupData.groupName, members: memberMessage })
     })
+
+    groupHost = ClientList.getClientBySocket(socket)
+    groupData.groupHash = createHash(groupHost.publicKeyHash + createTimestamp())
+    groupData.members.push(groupHost)
+    groupList.addGroup(groupData)
     console.log('New group created with the name ' + groupData.groupName)
   })
 })
