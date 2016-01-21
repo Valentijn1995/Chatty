@@ -47,4 +47,9 @@ SqliteManager.prototype.getSavedMessages = function(publicKeyHash, completeCallb
   })
 }
 
+SqliteManager.prototype.deleteSavedMessages = function(publicKeyHash)
+{
+  this.messageDB.run('DELETE FROM ' + this.messageDBTableName + ' WHERE receiver == (?)', publicKeyHash)
+}
+
 module.exports = SqliteManager

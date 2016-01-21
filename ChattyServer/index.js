@@ -74,6 +74,11 @@ io.on('connection', function(socket)
               socket.emit('message', message)
             }
           })
+
+          if(savedMessages.length > 0)
+          {
+            dbManager.deleteSavedMessages(client.publicKeyHash)
+          }
         })
         /*
           We could improve the registration by introducing a handshake meganism.
