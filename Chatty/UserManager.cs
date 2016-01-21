@@ -18,10 +18,10 @@ namespace Chatty
         }
 
         public Client GetClient(string identifier) {
-            if (_clientList == null || !_clientList.Any(client => client.PublicKey == identifier))
+            if (_clientList == null || !_clientList.Any(client => client.PublicKeyHash == identifier))
                 return null;
 
-            return _clientList.Single(client => client.PublicKey == identifier);
+            return _clientList.Single(client => client.PublicKeyHash == identifier);
         }
 
         public void AddGroup(Group group) {
@@ -46,7 +46,8 @@ namespace Chatty
             if(_chatHistories == null)
                 _chatHistories = new Dictionary<string, ChatHistory>();
 
-            _chatHistories.Add(identifier, new ChatHistory() { IsGroup = isGroup, Identifier = identifier });
+            if(!_chatHistories.ContainsKey(identifier))
+                _chatHistories.Add(identifier, new ChatHistory() { IsGroup = isGroup, Identifier = identifier });
         }
 
         public ChatHistory GetChatHistory(string identifier) {

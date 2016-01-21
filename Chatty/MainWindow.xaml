@@ -47,7 +47,12 @@
             <ListView x:Name="listView_Chat" Grid.Row="0" Margin="3">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn/>
+                        <GridViewColumn Width="140" Header="Timestamp"
+         DisplayMemberBinding="{Binding TimeStamp}"  />
+                        <GridViewColumn Width="140" Header="Username"  
+         DisplayMemberBinding="{Binding Username}" />
+                        <GridViewColumn Width="140" Header="Message"
+         DisplayMemberBinding="{Binding MessageString}" />
                     </GridView>
                 </ListView.View>
             </ListView>
