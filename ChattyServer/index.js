@@ -2,48 +2,14 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var crypto = require('crypto')
-var sqlite = require('sqlite3')
 
-var clientArray = []
+var ClientList = require('./lib/clientList')
+var SqliteManager = require('./lib/sqliteManager')
 
-function getClientByHash(hashString)
-{
-  var returnClient = false
-  clientArray.forEach(function(client)
-  {
-    if(client.publicKeyHash == hashString)
-    {
-      returnClient = client
-    }
-  })
-  return returnClient
-}
-
-function getClientBySocket(clientSocket)
-{
-  var returnClient = false
-  clientArray.forEach(function(client)
-  {
-    if(client.socket == clientSocket)
-    {
-      returnClient = client
-    }
-  })
-  return returnClient
-}
-
-function getClientByPublicKey(clientPublicKey)
-{
-  var returnClient = false
-  clientArray.forEach(function(client)
-  {
-    if(client.publicKey == clientPublicKey)
-    {
-      returnClient = client
-    }
-  })
-  return returnClient
-}
+var listenAddress = '192.168.2.167'
+var listenPort = 3000
+var clientList = new ClientList()
+var dbManager = new SqliteManager('messages.db')
 
 app.get('/', function(req, res)
 {
@@ -59,14 +25,53 @@ io.on('connection', function(socket)
     if(!('userName' in regData))
     {
       socket.emit('register-failed', 'Register data is missing a userName property')
+      return
     }
     else if (!('publicKey' in regData))
     {
       socket.emit('register-failed', 'Register data is missing a publicKey property')
+      return
     }
-    else if (getClientByPublicKey(regData.publickey) !== false)
+
+    client = clientList.getClientByPublicKey(regData.publicKey)
+
+    if (client !== false)
     {
-      socket.emit('register-failed', 'There is already a user registered with this publickey')
+      if(client.online == false)
+      {
+        client.online == true
+        client.socket = socket
+        socket.emit('register-accepted')
+        console.log('Client ' + client.userName + ' just came online!')
+        dbManager.getSavedMessages(client.publicKeyHash, function(savedMessages)
+        {
+          savedMessages.forEach(function(message)
+          {
+            socket.emit('message', message)
+          })
+        })
+        /*
+          We could improve the registration by introducing a handshake meganism.
+          With the current situation, a client can register with a public key
+          of another user. This evil client will not be able to read messages
+          of the hijaced user because the evil client is not able to decrypt
+          the received messages (the evil client needs the private key to do this).
+          The evil client can however prevent the real client from registering.
+
+          The solution to this problem is to create a handshake meganism.
+          The handshake meganism consists of the following steps:
+          - Client registers with his public key.
+          - Server genarates a random message and encrypts this message with the
+            given public key of the client.
+          - The server send the genarated message back to the Client
+          - The client decrypts the message
+          - The client sends the message back to the server
+          - The server checks if the message from the client is the same as the
+            previous genarated message
+          - The server registers the client when the genarated and received messages
+            are the same. The client has proven that he is the owner of the public key.
+        */
+      }
     }
     else
     {
@@ -76,7 +81,7 @@ io.on('connection', function(socket)
         regData.publicKeyHash = publicKeyHash
         regData.socket = socket
         regData.online = true
-        clientArray.push(regData)
+        clientList.addClient(regData)
         socket.emit('register-accepted')
         console.log('New client registered! Name: ' + regData.userName )
     }
@@ -84,35 +89,43 @@ io.on('connection', function(socket)
 
   socket.on('disconnect', function()
   {
-    var client  = getClientBySocket(socket)
+    var client  = clientList.getClientBySocket(socket)
     if(client !== false)
     {
-      console.log('User ' + client.userName + ' disconnected')
-      var clientIndex = clientArray.indexOf(client)
-      if(clientIndex > -1)
-      {
-        clientArray.splice(clientIndex, 1)
-      }
+      console.log('User ' + client.userName + ' disconnected and is now offline')
+      client.online = false
+      client.socket = null
     }
   })
 
   socket.on('message', function(msgData)
   {
     console.log('Message received')
-    var client = getClientBySocket(socket)
+    var client = clientList.getClientBySocket(socket)
     if(client !== false)
     {
-      var receiver = getClientByHash(msgData.receiver)
+      var receiver = clientList.getClientByHash(msgData.receiver)
       var msgTimeStamp = new Date.getTime()
       var emitMessage = { sender: client.publicKeyHash, message: msgData.message, timestamp: msgTimeStamp }
+      if('groupHash' in msgData)
+      {
+        emitMessage.groupHash = msgData.groupHash
+      }
+
       if(receiver !== false)
       {
-          receiver.emit('message', emitMessage)
+          if(receiver.online === true)
+          {
+            receiver.socket.emit('message', emitMessage)
+          }
+          else
+          {
+            dbManager.saveMessage(receiver.publicKeyHash, emitMessage)
+          }
       }
       else
       {
-          console.log("Message received form " + client.userName + " but the receiver is not known")
-
+          console.log("Message received from " + client.userName + " but the receiver is not known")
       }
     }
     else
@@ -124,7 +137,7 @@ io.on('connection', function(socket)
   socket.on('user-search', function(searchName)
   {
     var results = []
-    clientArray.forEach(function(client)
+    clientList.innerList.forEach(function(client)
     {
       if(client.userName.indexof(searchName) != -1)
       {
@@ -136,7 +149,7 @@ io.on('connection', function(socket)
 
   socket.on('user-confirm', function(hashString)
   {
-    var client = getClientByHash(hashString)
+    var client = clientList.getClientByHash(hashString)
     if(client !== false)
     {
       socket.emit('user-confirm',  { publicKey: client.publicKey, userName: client.userName })
@@ -155,7 +168,7 @@ io.on('connection', function(socket)
 
     groupData.members.forEach(function(clientHash)
     {
-      var client = getClientByHash(clientHash)
+      var client = clientList.getClientByHash(clientHash)
       if(client !== false)
       {
         memberList.push(client)
@@ -175,9 +188,9 @@ io.on('connection', function(socket)
   })
 })
 
+dbManager.createTableIfNeeded()
 
-
-http.listen(3000,'localhost', function()
+http.listen(listenPort, listenAddress, function()
 {
-  console.log('listening on localhost:3000')
+  console.log('listening on ' + listenAddress + ':' + listenPort)
 })
