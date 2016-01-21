@@ -22,7 +22,7 @@ SqliteManager.prototype.saveMessage = function(receiverHash, message)
     message.groupHash = ''
   }
 
-  this.messageDB.run('INSERT INTO ' + this.messageDBTableName + ' (sender, receiver, message, grouphash, timestamp) VALUES(?,?,?,?)',
+  this.messageDB.run('INSERT INTO ' + this.messageDBTableName + ' (sender, receiver, message, grouphash, timestamp) VALUES(?,?,?,?,?)',
   [message.sender,
   receiverHash,
   message.message,

@@ -55,7 +55,7 @@ io.on('connection', function(socket)
     {
       if(client.online == false)
       {
-        client.online == true
+        client.online = true
         client.socket = socket
         socket.emit('register-accepted')
         console.log('Client ' + client.userName + ' just came online!')
@@ -144,10 +144,12 @@ io.on('connection', function(socket)
       {
           if(receiver.online === true)
           {
+            console.log("Sending message to " + receiver.userName)
             receiver.socket.emit('message', emitMessage)
           }
           else
           {
+            console.log("Saving message for offline user " + receiver.userName)
             dbManager.saveMessage(receiver.publicKeyHash, emitMessage)
           }
       }
@@ -172,6 +174,7 @@ io.on('connection', function(socket)
         results.push({ userName: client.userName, publicKeyHash: client.publicKeyHash })
       }
     })
+    console.log("Did user search for " + searchName + " with the result: " + results)
     socket.emit('user-search', results)
   })
 
