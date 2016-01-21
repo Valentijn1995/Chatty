@@ -32,7 +32,8 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="8*"/>
                 <RowDefinition Height="6*"/>
-                <RowDefinition Height="46*"/>
+                <RowDefinition Height="8*"/>
+                <RowDefinition Height="38*"/>
                 <RowDefinition Height="10*"/>
                 <RowDefinition Height="10*"/>
                 <RowDefinition Height="10*"/>
@@ -40,11 +41,19 @@
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" Text="Create group" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14.667" />
             <TextBlock Grid.Row="1" Text="(Add members to group)" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <ListView x:Name="listView_group" Grid.Row="2" Margin="0,0,3,3" />
-            <Button x:Name="Btn_PrivateCon" Click="Btn_PrivateCon_Click" Grid.Row="3" Content="Start private conversation" Margin="0,0,3,3"/>
-            <Button x:Name="Btn_AddMember" Click="Btn_AddMember_Click" Grid.Row="4" Content="Add member" Margin="0,0,3,3"/>
-            <Button x:Name="Btn_RemoveMember" Click="Btn_RemoveMember_Click" Grid.Row="5" Content="Remove selected member" Margin="0,0,3,3"/>
-            <Button x:Name="Btn_GroupCon" Click="Btn_GroupCon_Click" Grid.Row="6" Content="Start group conversation" Margin="0,0,3,3"/>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="35*"/>
+                    <ColumnDefinition Width="65*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Groupname:" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBox x:Name="TxtBox_groupName" Grid.Column="1" />
+            </Grid>
+            <ListView x:Name="listView_group" Grid.Row="3" Margin="0,0,3,3" />
+            <Button x:Name="Btn_PrivateCon" Click="Btn_PrivateCon_Click" Grid.Row="4" Content="Start private conversation" Margin="0,0,3,3"/>
+            <Button x:Name="Btn_AddMember" Click="Btn_AddMember_Click" Grid.Row="5" Content="Add member" Margin="0,0,3,3"/>
+            <Button x:Name="Btn_RemoveMember" Click="Btn_RemoveMember_Click" Grid.Row="6" Content="Remove selected member" Margin="0,0,3,3"/>
+            <Button x:Name="Btn_GroupCon" Click="Btn_GroupCon_Click" Grid.Row="7" Content="Start group conversation" Margin="0,0,3,3"/>
         </Grid>
     </Grid>
 </Window>

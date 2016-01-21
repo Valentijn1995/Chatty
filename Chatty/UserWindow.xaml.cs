@@ -11,6 +11,8 @@ namespace Chatty
     public partial class UserWindow : Window {
         public event EventHandler<ProfileSelectedArgs> ProfileSelected;
 
+        private const int KEY_SIZE = 512;
+
         public UserWindow() {
             InitializeComponent();
 
@@ -22,7 +24,7 @@ namespace Chatty
         private void btn_NewProfile_Click(object sender, RoutedEventArgs e) {
             string username = txtBox_Username.Text;
             if(username != null && username.Length > 0) {
-                KeyPair pair = SecurityManager.GenerateKeys(512);
+                KeyPair pair = SecurityManager.GenerateKeys(KEY_SIZE);
                 User user = new User() { UserName = username, PrivateKey = pair.PrivateKey, PublicKey = pair.PublicKey };
                 ProfileManager.WriteUserInfo(user);
                 SelectProfile(user);

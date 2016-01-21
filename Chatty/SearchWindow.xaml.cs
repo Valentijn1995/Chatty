@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Chatty
 {
@@ -23,8 +24,13 @@ namespace Chatty
         }
 
         private void OnUserSearch(object sender, UserSearchEventArgs e) {
-            if(e.FoundMembers != null && e.FoundMembers.Count > 0) 
-                listView_results.ItemsSource = e.FoundMembers;
+            if (e.FoundMembers != null && e.FoundMembers.Count > 0) {
+                OnDispatcher( new Action(() => {
+                    foreach (var client in e.FoundMembers) {
+                        listView_results.Items.Add(client);
+                    }
+                }));
+            }
         }
 
         private void Btn_Search_Click(object sender, RoutedEventArgs e) {
@@ -38,7 +44,7 @@ namespace Chatty
             if(listView_results.SelectedItems != null && listView_results.SelectedItems.Count > 0 && PrivateChatCreated != null) {
                 foreach(var item in listView_results.SelectedItems) {
                     Client client = item as Client;
-                    PrivateChatCreated(this, new UserConfirmEventArgs() { UserName = client.UserName, PublicKey = client.PublicKey });
+                    PrivateChatCreated(this, new UserConfirmEventArgs() { UserName = client.UserName, PublicKeyHash = client.PublicKeyHash });
                 }
                 this.Close();
             }
@@ -47,7 +53,9 @@ namespace Chatty
         private void Btn_AddMember_Click(object sender, RoutedEventArgs e) {
             if(listView_results.SelectedItems != null && listView_results.SelectedItems.Count > 0) {
                 foreach(var item in listView_results.SelectedItems) {
-                    listView_results.Items.Add(item as Client);
+                    OnDispatcher(new Action(() => {
+                        listView_results.Items.Add(item as Client);
+                    }));
                 }
             }
         }
@@ -55,20 +63,30 @@ namespace Chatty
         private void Btn_RemoveMember_Click(object sender, RoutedEventArgs e) {
             if(listView_group.SelectedItems != null && listView_group.SelectedItems.Count > 0) {
                 foreach(var item in listView_group.SelectedItems) {
-                    listView_group.Items.Remove(item as Client);
+                    OnDispatcher(new Action(() => {
+                        listView_group.Items.Remove(item as Client);
+                    }));
                 }
             }
         }
 
         private void Btn_GroupCon_Click(object sender, RoutedEventArgs e) {
+            string groupName = TxtBox_groupName.Text;
+            if (groupName == null || groupName.Length <= 0)
+                return;
+
             if(listView_group.Items.Count > 1 && GroupCreated != null) {
                 List<Client> clients = new List<Client>();
                 foreach(var item in listView_group.SelectedItems) {
                     clients.Add(item as Client);
                 }
-                GroupCreated(this, new GroupJoinedEventArgs() { GroupName = "", Members = clients });   //TODO Add groupname
+                GroupCreated(this, new GroupJoinedEventArgs() { GroupName = groupName, Members = clients });   //TODO Add groupname
                 this.Close();
             }
+        }
+
+        private void OnDispatcher(Action action) {
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
         }
     }
 }

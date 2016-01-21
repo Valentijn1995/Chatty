@@ -72,7 +72,7 @@ namespace Chatty
 
         public void ConfirmUser(string identifier) {
             if(_socket != null)
-                _socket.Emit("comfirm-user", identifier);
+                _socket.Emit("user-confirm", identifier);
         }
 
         public void SearchUser(string userName) {

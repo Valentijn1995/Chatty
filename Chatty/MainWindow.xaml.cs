@@ -3,6 +3,7 @@ using Chatty.Model.INotify;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Chatty
 {
@@ -40,13 +41,17 @@ namespace Chatty
         private void OnGroupJoined(object sender, GroupJoinedEventArgs e) {
             var group = new Group() { GroupHash = e.GroupName, ClientList = e.Members };
             _manager.AddGroup(group);
-            listView_Clients.Items.Add(new ChatItem() { Identifier = group.GroupHash, Value = group.GroupName });
+            OnDispatcher(new Action(() => {
+                listView_Clients.Items.Add(new ChatItem() { Identifier = group.GroupHash, Value = group.GroupName });
+            }));
         }
 
         private void OnUserConfirm(object sender, UserConfirmEventArgs e) {
             var client = new Client() { PublicKey = e.PublicKey, UserName = e.UserName };
             _manager.AddClient(client);
-            listView_Clients.Items.Add(new ChatItem() { Identifier = client.PublicKeyHash, Value = client.UserName });
+            OnDispatcher(new Action(() => {
+                listView_Clients.Items.Add(new ChatItem() { Identifier = client.PublicKeyHash, Value = client.UserName });
+            }));
             _manager.GetChatHistory(client.PublicKeyHash).PushMessage(RetrieveMessages(client.PublicKeyHash), client.UserName);
         }
 
@@ -89,8 +94,12 @@ namespace Chatty
         private void Button_Create_Click(object sender, RoutedEventArgs e) {
             SearchWindow window = new SearchWindow(_client);
             window.GroupCreated += OnGroupJoined;
-            window.PrivateChatCreated += OnUserConfirm;
+            window.PrivateChatCreated += PrivateChatCreated;
             window.ShowDialog();
+        }
+
+        private void PrivateChatCreated(object sender, UserConfirmEventArgs e) {
+            _client.ConfirmUser(e.PublicKeyHash);
         }
 
         private void OnProfileSelected(object sender, ProfileSelectedArgs e) {
@@ -136,6 +145,22 @@ namespace Chatty
                 return _openMessages[identifier];
 
             return null;
+        }
+
+        private void OnDispatcher(Action action) {
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, action);
+        }
+
+        private void listView_Clients_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            var item = listView_Clients.SelectedItem;
+            if (item != null) {
+                ChatItem chatItem = item as ChatItem;
+                Client client = _manager.GetClient(chatItem.Identifier);
+                ChatHistory history = _manager.GetChatHistory(client.PublicKeyHash);
+                OnDispatcher(new Action(() => {
+                    listView_Chat.ItemsSource = history;
+                }));
+            }
         }
     }
 }

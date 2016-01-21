@@ -17,12 +17,12 @@
                 <RowDefinition Height="90*"/>
                 <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
-            <ListView x:Name="listView_Clients" Grid.Row="0" Margin="3">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn/>
-                    </GridView>
-                </ListView.View>
+            <ListView x:Name="listView_Clients" Grid.Row="0" Margin="3" MouseDoubleClick="listView_Clients_MouseDoubleClick">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Value}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListBoxItem}">
                         <Style.Triggers>

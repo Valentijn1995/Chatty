@@ -18,7 +18,8 @@ namespace Chatty.Model
         }
 
         internal void PushMessage(List<Message> messages, string username) {
-            messages.ForEach(message => { PushMessage(message.MessageString, message.Username, message.TimeStamp); });
+            if(messages != null && messages.Count > 0) 
+                messages.ForEach(message => { PushMessage(message.MessageString, message.Username, message.TimeStamp); });
         }
     }
 }
