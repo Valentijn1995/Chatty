@@ -16,8 +16,12 @@ namespace Chatty
 
         private Socket _socket;
 
+        /// <summary>
+        /// Server certifaction validation is ingnored, because the server uses a self-signed certificate.
+        /// </summary>
+        /// <param name="adress"></param>
         public void Initialize(string adress) {
-            _socket = IO.Socket("http://localhost:3000/");
+            _socket = IO.Socket(adress, new IO.Options() { Secure = true, IgnoreServerCertificateValidation = true });
 
             _socket.On("register-accepted", (data) => {
                 Console.WriteLine("Succesfull connected with Server");
@@ -40,7 +44,7 @@ namespace Chatty
             });
             _socket.On("joined-group", (data) => {
                 var message = JsonConvert.DeserializeObject<JsonJoinedGroup>(data.ToString());
-                OnGroupJoined(this, new GroupJoinedEventArgs() { GroupName = message.GroupName, Members = message.Members, GroupHash = message.GroupHash });
+                OnGroupJoined(this, new GroupJoinedEventArgs() { GroupName = message.GroupName, GroupHash = message.GroupHash, Members = message.Members });
             });
 
             _socket.Connect();
@@ -66,7 +70,10 @@ namespace Chatty
         }
 
         public void SendGroupMessage(Group group, string message) {
-            group.ClientList.ForEach(client => { SendMessage(client.PublicKeyHash, SecurityManager.EncryptText(message, client.PublicKey)); });
+            group.ClientList.ForEach(client => {
+                string encryptedMessage = SecurityManager.EncryptText(message, client.PublicKey);
+                _socket.Emit("message", JObject.FromObject(new JsonSendMessage() { ReceiverIdentifier = client.PublicKeyHash, GroupHash = group.GroupHash, Message = encryptedMessage }));
+            });
         }
 
         public void ConfirmUser(string identifier) {

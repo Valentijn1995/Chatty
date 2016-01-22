@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chatty"
         mc:Ignorable="d"
-        Title="SettingsWindow" Height="400" Width="350" WindowStartupLocation="CenterOwner">
+        Title="Chatty - Select Profile" Height="400" Width="350" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="8*"/>

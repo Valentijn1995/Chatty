@@ -8,11 +8,21 @@ namespace Chatty
     public static class SecurityManager {
         private static bool _optimalAsymmetricEncryptionPadding = false;
 
+        /// <summary>
+        /// Converts string to SHA1 Hash.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static string SHA1hash(string input) {
             var hash = (new SHA1Managed()).ComputeHash(Encoding.UTF8.GetBytes(input));
             return string.Join("", hash.Select(b => b.ToString("x2")).ToArray());
         }
 
+        /// <summary>
+        /// Generate a Keypair
+        /// </summary>
+        /// <param name="keySize"></param>
+        /// <returns></returns>
         public static KeyPair GenerateKeys(int keySize = 512) {
             if (!IsKeySizeValid(keySize))
                 throw new Exception("Key should be multiple of two and greater than 512.");

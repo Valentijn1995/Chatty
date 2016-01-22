@@ -3,6 +3,7 @@ using Chatty.Model.INotify;
 using System;
 using System.Windows;
 using System.Windows.Threading;
+using System.Collections.Generic;
 
 namespace Chatty
 {
@@ -24,12 +25,13 @@ namespace Chatty
             UserWindow window = new UserWindow();
             window.ProfileSelected += (sender, e) => {
                 _user = e.Profile;
+                this.Title = $"Chatty - {_user.UserName}";
                 Connect();
             };
             window.ShowDialog();
         }
 
-        private void Connect(string adress = "http://localhost:3000") {
+        private void Connect(string adress = "https://localhost:3000") {
             _client.Initialize(adress);
             _client.OnMessageReceived += OnMessageReceived;
             _client.OnUserConfirm += OnUserConfirm;
@@ -40,8 +42,13 @@ namespace Chatty
         #region Events
 
         private void OnGroupJoined(object sender, GroupJoinedEventArgs e) {
-            Group group = new Group() { GroupHash = e.GroupName, ClientList = e.Members };
+            if (_manager.GetGroup(e.GroupHash) != null)
+                return;
+
+            Group group = new Group() { GroupHash = e.GroupHash, GroupName = e.GroupName, ClientList = e.Members };
+            group.ClientList = FilterOwnUser(group.ClientList);
             _manager.AddGroup(group);
+            _manager.AddClient(e.Members);
             OnDispatcher(new Action(() => {
                 listView_Clients.Items.Add(new ChatItem() { Identifier = group.GroupHash, Value = group.GroupName });
             }));
@@ -50,6 +57,9 @@ namespace Chatty
         }
 
         private void OnUserConfirm(object sender, UserConfirmEventArgs e) {
+            if (_manager.GetClient(e.PublicKeyHash) != null)
+                return;
+
             Client client = new Client() { PublicKey = e.PublicKey, UserName = e.UserName };
             OnDispatcher(new Action(() => {
                 listView_Clients.Items.Add(new ChatItem() { Identifier = client.PublicKeyHash, Value = client.UserName });
@@ -63,12 +73,12 @@ namespace Chatty
             e.TimeStamp = ConvertTicks(e.TimeStamp);
             e.Message = SecurityManager.DecryptText(e.Message, _user.PrivateKey);
             if (e.GroupMessage) {
-                if(_manager.GetGroup(e.Identifier) != null) {                       //Known Group
+                if(_manager.GetGroup(e.GroupHash) != null) {                       //Known Group
                     Client client = _manager.GetClient(e.Identifier);
-                    _manager.GetChatHistory(e.Identifier).PushMessage(e.Message, client.UserName, e.TimeStamp);
+                    _manager.GetChatHistory(e.GroupHash).PushMessage(e.Message, client.UserName, e.TimeStamp);
                 }
                 else {                                                              //Unkown Group
-                    //TODO Get group from server or is this already done on connect?
+                    Console.WriteLine("You should not be able to get here");
                 }
             }
             else {
@@ -149,6 +159,12 @@ namespace Chatty
                 return (listView_Chat.ItemsSource as ChatHistory).IsGroup;
             }
             return false;
+        }
+        
+        private List<Client> FilterOwnUser(List<Client> clientList) {
+            Client clientToRemove = clientList.Find(client => client.PublicKey == _user.PublicKey);
+            clientList.Remove(clientToRemove);
+            return clientList;
         }
 
         #endregion GUI Helpers

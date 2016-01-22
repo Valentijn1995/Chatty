@@ -25,8 +25,14 @@ namespace Chatty
 
         private void OnUserSearch(object sender, UserSearchEventArgs e) {
             if (e.FoundMembers != null && e.FoundMembers.Count > 0) {
+                /*List<Client> members = new List<Client>();
+                foreach (Client client in e.FoundMembers) {
+                    if (!members.Contains(client))
+                        members.Add(client);
+                }*/
+                //TODO Filter unique clients
                 OnDispatcher( new Action(() => {
-                    foreach (var client in e.FoundMembers) {
+                    foreach (Client client in e.FoundMembers) {
                         listView_results.Items.Add(client);
                     }
                 }));
@@ -54,11 +60,16 @@ namespace Chatty
 
         private void Btn_AddMember_Click(object sender, RoutedEventArgs e) {
             if(listView_results.SelectedItems != null && listView_results.SelectedItems.Count > 0) {
+
+                //var addedClients = listView_group.Items;
                 foreach(var item in listView_results.SelectedItems) {
-                    OnDispatcher(new Action(() => {
-                        listView_group.Items.Add(item as Client);
-                    }));
+                    //if (!addedClients.Contains((item as Client))) {
+                        OnDispatcher(new Action(() => {
+                            listView_group.Items.Add(item as Client);
+                        }));
                 }
+                //}
+                //TODO Filter unique members
             }
         }
 
@@ -77,7 +88,7 @@ namespace Chatty
             if (groupName == null || groupName.Length <= 0)
                 return;
 
-            if(listView_group.Items.Count > 1 && GroupCreated != null) {
+            if(listView_group.Items.Count >= 2 && GroupCreated != null) {   
                 List<Client> clients = new List<Client>();
                 foreach(var item in listView_group.Items) {
                     clients.Add(item as Client);

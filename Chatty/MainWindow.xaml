@@ -57,9 +57,9 @@
             <ListView x:Name="listView_Chat" Grid.Row="1" Margin="3,0,3,3" >
                 <ListView.View>
                     <GridView ColumnHeaderContainerStyle="{StaticResource noHeaderStyle}">
-                        <GridViewColumn Width="40" Header="Time" DisplayMemberBinding="{Binding TimeString}"  />
+                        <GridViewColumn Width="50" Header="Time" DisplayMemberBinding="{Binding TimeString}"  />
                         <GridViewColumn Width="80" Header="Username" DisplayMemberBinding="{Binding Username}" />
-                        <GridViewColumn Header="Message" DisplayMemberBinding="{Binding MessageString}" />
+                        <GridViewColumn Width="Auto" Header="Message" DisplayMemberBinding="{Binding MessageString}" />
                     </GridView>
                 </ListView.View>
             </ListView>

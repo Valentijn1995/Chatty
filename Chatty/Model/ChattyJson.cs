@@ -10,6 +10,8 @@ namespace Chatty.Model
     {
         [JsonProperty("receiver")]
         public string ReceiverIdentifier { get; set; }
+        [JsonProperty("groupHash")]
+        public string GroupHash { get; set; }
         [JsonProperty("message")]
         public string Message { get; set; }
     }
