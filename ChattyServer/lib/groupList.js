@@ -35,7 +35,7 @@ GroupList.prototype.getGroupsOfClient = function(client)
   groupsOfClient = []
   this.innerList.forEach(function(group)
   {
-    group.member.forEach(function(member)
+    group.members.forEach(function(member)
     {
       if(member.publicKey === client.publicKey)
       {

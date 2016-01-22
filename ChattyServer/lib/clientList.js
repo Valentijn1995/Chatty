@@ -30,6 +30,19 @@ ClientList.prototype.getClientByHash = function(hashString)
   return returnClient
 }
 
+ClientList.prototype.getClientsByHash = function(hashArray)
+{
+  var results = []
+  this.innerList.forEach(function(client)
+  {
+    if(client.publicKeyHash in hashArray)
+    {
+      results.push(client)
+    }
+  })
+  return results
+}
+
 ClientList.prototype.getClientBySocket = function(clientSocket)
 {
   var returnClient = false

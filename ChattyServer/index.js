@@ -75,11 +75,11 @@ io.on('connection', function(socket)
       return
     }
 
-    client = clientList.getClientByPublicKey(regData.publicKey)
+    var client = clientList.getClientByPublicKey(regData.publicKey)
 
     if (client !== false) // Do we know this client?
     {
-      if(client.online == false) //Is the client registed as offline?
+      if(client.online == false) //Is the client registered as offline?
       {
         client.online = true
         client.socket = socket
@@ -104,7 +104,7 @@ io.on('connection', function(socket)
             var groupDoesExist = groupList.groupExists(message.groupHash)
 
             //Only send a the message if it is a group message and the group still exists or
-            // when it then the message is a invidual message.
+            // when it then the message is a individual message.
             if((isGroupMessage && groupDoesExist) || !isGroupMessage)
             {
               socket.emit('message', message)
@@ -256,22 +256,25 @@ io.on('connection', function(socket)
   */
   socket.on('create-group', function(groupData)
   {
-    var memberList = []
-    var memberMessage = []
-    var groupHost = ClientList.getClientBySocket(socket)
+    var groupHost = clientList.getClientBySocket(socket)
     if(groupHost === false)
     {
       console.log('Non existing client tried to create a group!')
       return
     }
     // Create a unique hash to identify this group.
-    groupData.groupHash = createHash(groupHost.publicKeyHash + createTimestamp())
+    var createdGroupHash = createHash(groupHost.publicKeyHash + createTimestamp())
+    var memberHashList = groupData.members
+    var groupName = groupData.groupName
+    var memberList = []
+    var memberMessage = []
+
     // Add the host as a member
-    groupData.members.push(groupHost)
-    groupList.addGroup(groupData)
+    memberList.push(groupHost)
+    memberMessage.push({ userName: groupHost.userName, publicKey: groupHost.publicKey })
 
     //Build-up the list of members.
-    groupData.members.forEach(function(clientHash)
+    memberHashList.forEach(function(clientHash)
     {
       var client = clientList.getClientByHash(clientHash)
       if(client !== false)
@@ -285,6 +288,8 @@ io.on('connection', function(socket)
       }
     })
 
+    //Create the message which will be send to the groupMembers
+    var joinedGroupMessage = { groupName: groupName, groupHash: createdGroupHash, members: memberMessage }
     //Nofity the members of the group
     memberList.forEach(function(member)
     {
@@ -292,11 +297,11 @@ io.on('connection', function(socket)
       // as soon as they come online (and register with the server).
       if(member.online === true)
       {
-        member.socket.emit('joined-group', { groupName: groupData.groupName, members: memberMessage })
+        member.socket.emit('joined-group', joinedGroupMessage)
       }
     })
-
-    console.log('New group created with the name ' + groupData.groupName)
+    groupList.addGroup(joinedGroupMessage) //Add the group info to the groupList so the group can be found later.
+    console.log('New group created with the name ' + groupName)
   })
 })
 
