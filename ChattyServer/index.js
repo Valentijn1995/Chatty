@@ -1,18 +1,17 @@
 /*
   This this the main file of the Chatty server application.
 */
-
+var fs = require('fs')
 var httpsServerOptions = {
   key: fs.readFileSync('./ChattyServer.key'),
   cert: fs.readFileSync('./ChattyServer.pem')
 };
-
 // node_module imports
 var app = require('express')();
 var https = require('https').createServer(httpsServerOptions, app);
 var io = require('socket.io')(https);
 var crypto = require('crypto')
-var fs = require('fs')
+
 
 // lib imports
 var ClientList = require('./lib/clientList')
