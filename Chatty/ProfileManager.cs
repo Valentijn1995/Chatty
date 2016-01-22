@@ -11,6 +11,10 @@ namespace Chatty
         private static string _file = "/Chatty.json";
         private static string _fullPath = _dir + _file;
 
+        /// <summary>
+        /// Read all users from the User json file.
+        /// </summary>
+        /// <returns></returns>
         public static List<User> GetUsers() {
             List<User> users = ReadFile(_fullPath);
             if(users != null && users.Count > 0)
@@ -19,6 +23,10 @@ namespace Chatty
             return null;
         }
 
+        /// <summary>
+        /// Write a new profile to the User json file.
+        /// </summary>
+        /// <param name="user"></param>
         public static void WriteUserInfo(User user) {
             List<User> currentUsers = ReadFile(_fullPath);
             if(currentUsers != null) {
@@ -30,6 +38,11 @@ namespace Chatty
             }
         }
 
+        /// <summary>
+        /// Creates the file (and directory) if it does not exist.
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <param name="file"></param>
         private static void CreateFile(string dir, string file) {
             if (!Directory.Exists(dir)) 
                 Directory.CreateDirectory(dir);
@@ -37,6 +50,11 @@ namespace Chatty
             File.Create(_dir + file);
         }
 
+        /// <summary>
+        /// Reads the file and deserialize it.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         private static List<User> ReadFile(string path) {
             if (File.Exists(path)) {
                 List<User> users = null;
@@ -52,6 +70,12 @@ namespace Chatty
             return null;
         }
 
+        /// <summary>
+        /// Write a serializable object to the given file.
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <param name="file"></param>
+        /// <param name="value"></param>
         private static void WriteFile(string dir, string file, object value) {
             if (!File.Exists(dir + file))
                 CreateFile(_dir, file);

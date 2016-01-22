@@ -5,8 +5,12 @@ using System.ComponentModel;
 
 namespace Chatty.Model.INotify
 {
-    public class PropChangeObservableCollection<T> :
-           ObservableCollection<T> where T : INotifyPropertyChanged
+    /// <summary>
+    /// This class allows to update the entire collection when an item in the collection has Notified a property change.
+    /// Copyright and Created by: Ricardo Magalhães
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class PropChangeObservableCollection<T> : ObservableCollection<T> where T : INotifyPropertyChanged
     {
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e) {
             if(e.Action == NotifyCollectionChangedAction.Add) {

@@ -2,7 +2,6 @@
 using Chatty.Model.INotify;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace Chatty
 {
@@ -101,8 +100,12 @@ namespace Chatty
             return null;
         }
 
-
-
+        /// <summary>
+        /// Saves a message for later use.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="message"></param>
+        /// <param name="timeStamp"></param>
         public void SaveMessage(string identifier, string message, long timeStamp) {
             if(_openMessages == null)
                 _openMessages = new Dictionary<string, List<Message>>();
@@ -114,14 +117,17 @@ namespace Chatty
                 _openMessages.Add(identifier, new List<Message>() { new Message() { MessageString = message, TimeStamp = timeStamp } });
             }
         }
-
+        
+        /// <summary>
+        /// Retrieve save message.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <returns></returns>
         public List<Message> RetrieveMessages(string identifier) {
             if(_openMessages != null && _openMessages.ContainsKey(identifier))
                 return _openMessages[identifier];
 
             return null;
         }
-
-        public bool IsGroup(string identifier) => GetClient(identifier) == null;
     }
 }

@@ -6,6 +6,8 @@ using System.Text;
 namespace Chatty
 {
     public static class SecurityManager {
+        private const int KEY_SIZE = 512;
+
         private static bool _optimalAsymmetricEncryptionPadding = false;
 
         /// <summary>
@@ -19,11 +21,11 @@ namespace Chatty
         }
 
         /// <summary>
-        /// Generate a Keypair
+        /// Generate a Keypair with RSA encryption.
         /// </summary>
         /// <param name="keySize"></param>
         /// <returns></returns>
-        public static KeyPair GenerateKeys(int keySize = 512) {
+        public static KeyPair GenerateKeys(int keySize = KEY_SIZE) {
             if (!IsKeySizeValid(keySize))
                 throw new Exception("Key should be multiple of two and greater than 512.");
 
@@ -43,23 +45,39 @@ namespace Chatty
             return response;
         }
 
+        /// <summary>
+        ///  Encrypts the text using the key
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="publicKey"></param>
+        /// <returns></returns>
         public static string EncryptText(string text, string publicKey) {
             int keySize = 0;
             string publicKeyXml = "";
 
             GetKeyFromEncryptionString(publicKey, out keySize, out publicKeyXml);
 
-            var encrypted = Encrypt(Encoding.UTF8.GetBytes(text), keySize, publicKeyXml);
-            return Convert.ToBase64String(encrypted);
+            try {
+                var encrypted = Encrypt(Encoding.UTF8.GetBytes(text), keySize, publicKeyXml);
+                return Convert.ToBase64String(encrypted);
+            } catch {}
+            return null;
         }
 
+        /// <summary>
+        /// Encrypts the text using the given keySize and key
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="keySize"></param>
+        /// <param name="publicKeyXml"></param>
+        /// <returns></returns>
         private static byte[] Encrypt(byte[] data, int keySize, string publicKeyXml) {
             if(data == null || data.Length == 0)
                 throw new ArgumentException("Data are empty", nameof(data));
 
             int maxLength = GetMaxDataLength(keySize);
             if (data.Length > maxLength)
-                throw new ArgumentException(String.Format("Maximum data length is {0}", maxLength), nameof(data));
+                throw new ArgumentException(string.Format("Maximum data length is {0}", maxLength), nameof(data));
 
             if(!IsKeySizeValid(keySize))
                 throw new ArgumentException("Key size is not valid", nameof(keySize));
@@ -73,6 +91,12 @@ namespace Chatty
             }
         }
 
+        /// <summary>
+        /// Decrypts the text using the key
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="privateKey"></param>
+        /// <returns></returns>
         public static string DecryptText(string text, string privateKey) {
             int keySize = 0;
             string publicAndPrivateKeyXml = "";
@@ -83,6 +107,13 @@ namespace Chatty
             return Encoding.UTF8.GetString(decrypted);
         }
 
+        /// <summary>
+        /// Decrypts the text using the given keySize and key
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="keySize"></param>
+        /// <param name="publicAndPrivateKeyXml"></param>
+        /// <returns></returns>
         private static byte[] Decrypt(byte[] data, int keySize, string publicAndPrivateKeyXml) {
             if(data == null || data.Length == 0)
                 throw new ArgumentException("Data are empty", nameof(data));
@@ -99,19 +130,41 @@ namespace Chatty
             }
         }
 
-        public static int GetMaxDataLength(int keySize) {
+        /// <summary>
+        /// Returns the max length bases on keysize.
+        /// </summary>
+        /// <param name="keySize"></param>
+        /// <returns></returns>
+        public static int GetMaxDataLength(int keySize = KEY_SIZE) {
             if (_optimalAsymmetricEncryptionPadding) {
                 return ((keySize - 384) / 8) + 7;
             }
             return ((keySize - 384) / 8) + 37;
         }
 
+        /// <summary>
+        /// Checks wether the given keySize is a valid size.
+        /// </summary>
+        /// <param name="keySize"></param>
+        /// <returns></returns>
         public static bool IsKeySizeValid(int keySize) => keySize >= 384 &&
             keySize <= 16384 &&
             keySize % 8 == 0;
 
+        /// <summary>
+        /// Converts key to a usable string.
+        /// </summary>
+        /// <param name="publicKey"></param>
+        /// <param name="keySize"></param>
+        /// <returns></returns>
         private static string IncludeKeyInEncryptionString(string publicKey, int keySize) => Convert.ToBase64String(Encoding.UTF8.GetBytes(keySize.ToString() + "!" + publicKey));
 
+        /// <summary>
+        /// Retrieve the key from the raw generated key.
+        /// </summary>
+        /// <param name="rawkey"></param>
+        /// <param name="keySize"></param>
+        /// <param name="xmlKey"></param>
         private static void GetKeyFromEncryptionString(string rawkey, out int keySize, out string xmlKey) {
             keySize = 0;
             xmlKey = "";
@@ -127,7 +180,7 @@ namespace Chatty
                         keySize = int.Parse(splittedValues[0]);
                         xmlKey = splittedValues[1];
                     }
-                    catch (Exception) { }
+                    catch { }
                 }
             }
         }

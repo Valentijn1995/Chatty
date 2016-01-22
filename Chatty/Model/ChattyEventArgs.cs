@@ -30,4 +30,9 @@ namespace Chatty.Model
         public string GroupHash { get; set; }
         public List<Client> Members { get; set; }
     }
+
+    public class ProfileSelectedArgs
+    {
+        public User Profile { get; set; }
+    }
 }

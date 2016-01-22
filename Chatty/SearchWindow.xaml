@@ -24,7 +24,7 @@
                     <ColumnDefinition Width="75*"/>
                     <ColumnDefinition Width="25*"/>
                 </Grid.ColumnDefinitions>
-                <TextBox x:Name="Txtbox_Search" Grid.Column="0" Margin="3,0,0,3"/>
+                <TextBox x:Name="Txtbox_Search" Grid.Column="0" Margin="3,0,0,3" KeyUp="Txtbox_Search_KeyUp"/>
                 <Button x:Name="Btn_Search" Click="Btn_Search_Click" Grid.Column="1" Content="Search" Margin="3,0,3,3"/>
             </Grid>
         </Grid>

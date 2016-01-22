@@ -17,11 +17,12 @@ namespace Chatty
         private Socket _socket;
 
         /// <summary>
+        /// Initializes the socket and sets-up all the events to listen to.
         /// Server certifaction validation is ingnored, because the server uses a self-signed certificate.
         /// </summary>
         /// <param name="adress"></param>
-        public void Initialize(string adress) {
-            _socket = IO.Socket(adress, new IO.Options() { Secure = true, IgnoreServerCertificateValidation = true });
+        public void Initialize(string adress, bool ignoreServerCertificateValidation) {
+            _socket = IO.Socket(adress, new IO.Options() { Secure = true, IgnoreServerCertificateValidation = ignoreServerCertificateValidation });
 
             _socket.On("register-accepted", (data) => {
                 Console.WriteLine("Succesfull connected with Server");
@@ -66,7 +67,10 @@ namespace Chatty
         }
 
         public void SendMessage(Client client, string message) {
-            SendMessage(client.PublicKeyHash, SecurityManager.EncryptText(message, client.PublicKey));
+            string encryptedMessage = SecurityManager.EncryptText(message, client.PublicKey);
+            if(encryptedMessage != null) {
+                SendMessage(client.PublicKeyHash, encryptedMessage);
+            }
         }
 
         public void SendGroupMessage(Group group, string message) {

@@ -53,13 +53,30 @@
                 <RowDefinition Height="83*"/>
                 <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
-            <TextBlock x:Name="Label_Chatname" Grid.Row="0" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <DockPanel Grid.Row="0" >
+                <TextBlock x:Name="Label_Chatname" DockPanel.Dock="Left" Margin="3"/>
+                <Menu DockPanel.Dock="Right" IsMainMenu="True" Width="55" HorizontalAlignment="Right" Margin="0,0,3,0">
+                    <MenuItem Header="_Settings" Margin="0,1.5,0,0">
+                        <MenuItem x:Name="Menu_Reconnect" Header="Reconnect" Click="Menu_Reconnect_Click"/>
+                        <MenuItem x:Name="Menu_ServerAdress" Header="Change Server Adress">
+                            <TextBox x:Name="TxtBox_ServerAdress" Text="https://localhost:3000"/>
+                        </MenuItem>
+                        <MenuItem x:Name="Menu_IgnoreServerCertificateValidation" Header="Ignore Server Certificate Validation" IsCheckable="True" IsChecked="True"/>
+                    </MenuItem>
+                </Menu>
+            </DockPanel>
             <ListView x:Name="listView_Chat" Grid.Row="1" Margin="3,0,3,3" >
                 <ListView.View>
                     <GridView ColumnHeaderContainerStyle="{StaticResource noHeaderStyle}">
                         <GridViewColumn Width="50" Header="Time" DisplayMemberBinding="{Binding TimeString}"  />
                         <GridViewColumn Width="80" Header="Username" DisplayMemberBinding="{Binding Username}" />
-                        <GridViewColumn Width="Auto" Header="Message" DisplayMemberBinding="{Binding MessageString}" />
+                        <GridViewColumn Header="Description" Width="400">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock TextWrapping="Wrap" Text="{Binding MessageString}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                     </GridView>
                 </ListView.View>
             </ListView>
@@ -69,7 +86,7 @@
                     <ColumnDefinition Width="20*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox x:Name="Textbox_Message" Grid.Column="0" Margin="3,0,0,3"/>
+                <TextBox x:Name="Textbox_Message" Grid.Column="0" Margin="3,0,0,3" KeyUp="Textbox_Message_KeyDown"/>
                 <Button Grid.Column="1" Content="Send" Margin="3,0,3,3" Click="Button_Send_Click"/>
             </Grid>
         </Grid>
