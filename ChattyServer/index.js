@@ -2,11 +2,17 @@
   This this the main file of the Chatty server application.
 */
 
+var httpsServerOptions = {
+  key: fs.readFileSync('./ChattyServer.key'),
+  cert: fs.readFileSync('./ChattyServer.pem')
+};
+
 // node_module imports
 var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var https = require('https').createServer(httpsServerOptions, app);
+var io = require('socket.io')(https);
 var crypto = require('crypto')
+var fs = require('fs')
 
 // lib imports
 var ClientList = require('./lib/clientList')
@@ -19,6 +25,7 @@ var listenPort = 3000
 var clientList = new ClientList()
 var groupList = new GroupList()
 var dbManager = new SqliteManager('messages.db')
+
 
 /**
  * Creates a sha1 hash of a given string.
