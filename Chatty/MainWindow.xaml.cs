@@ -20,6 +20,9 @@ namespace Chatty
 
         public MainWindow() {
             _client = new ChattyClient();
+            _client.OnMessageReceived += OnMessageReceived;
+            _client.OnUserConfirm += OnUserConfirm;
+            _client.OnGroupJoined += OnGroupJoined;
             _manager = new UserManager();
 
             InitializeComponent();
@@ -38,9 +41,6 @@ namespace Chatty
         private void Connect() {
             string adress = TxtBox_ServerAdress.Text;
             _client.Initialize(adress, Menu_IgnoreServerCertificateValidation.IsChecked);
-            _client.OnMessageReceived += OnMessageReceived;
-            _client.OnUserConfirm += OnUserConfirm;
-            _client.OnGroupJoined += OnGroupJoined;
             _client.Register(_user.UserName, _user.PublicKey);
         }
 
@@ -99,18 +99,18 @@ namespace Chatty
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OnMessageReceived(object sender, MessageReceivedEventArgs e) {
-            e.TimeStamp = ConvertTicks(e.TimeStamp);
-            e.Message = SecurityManager.DecryptText(e.Message, _user.PrivateKey);
+            long convertedTimestamp = ConvertTicks(e.TimeStamp);
+            string decryptedMessage = SecurityManager.DecryptText(e.Message, _user.PrivateKey);
             if (e.GroupMessage) {
                 if(_manager.GetGroup(e.GroupHash) != null) {                       //Known Group
                     Client client = _manager.GetClient(e.Identifier);
-                    _manager.GetChatHistory(e.GroupHash).PushMessage(e.Message, client.UserName, e.TimeStamp);
+                    _manager.GetChatHistory(e.GroupHash).PushMessage(decryptedMessage, client.UserName, convertedTimestamp);
                 }
             }
             else {
                 if (_manager.GetClient(e.Identifier) != null) {                     //Known Client
                     Client client = _manager.GetClient(e.Identifier);
-                    _manager.GetChatHistory(e.Identifier).PushMessage(e.Message, client.UserName, e.TimeStamp);
+                    _manager.GetChatHistory(e.Identifier).PushMessage(decryptedMessage, client.UserName, convertedTimestamp);
                     if(!DoesChatItemExist(e.Identifier)) {
                         OnDispatcher(new Action(() => {
                             listView_Clients.Items.Add(new ChatItem() { Identifier = client.PublicKeyHash, Value = client.UserName });
@@ -119,7 +119,7 @@ namespace Chatty
                 }
                 else {                                                              //Unknown Client
                     _client.ConfirmUser(e.Identifier);
-                    _manager.SaveMessage(e.Identifier, e.Message, e.TimeStamp);
+                    _manager.SaveMessage(e.Identifier, decryptedMessage, convertedTimestamp);
                 }
             }
         }
@@ -239,7 +239,7 @@ namespace Chatty
         /// </summary>
         /// <param name="timeStamp"></param>
         /// <returns></returns>
-        private long ConvertTicks(long timeStamp) => (new DateTime(1970, 1, 1, 1, 0, 0) + new TimeSpan(timeStamp * 10000)).Ticks;
+        private long ConvertTicks(long timeStamp) => new DateTime(1970, 1, 1, 1, 0, 0, DateTimeKind.Utc).AddMilliseconds(timeStamp).Ticks;
 
         private List<ChatItem> GetChatItems() => ConvertToTypedList<ChatItem>(listView_Clients.Items);
 
