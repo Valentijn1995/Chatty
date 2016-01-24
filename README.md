@@ -30,7 +30,7 @@ This will install all the dependencies of the ChattyServer
 You can install the Chatty client by downloading the Chatty directory and Chatty.sln file from the master branch. Open de **Chatty.sln** file with Microsoft Visual Studio so you can build and run the client.
 
 ## Known bugs
-We experienced communication delays between clients and server durning the development of the program. 
+We experienced communication delays between clients and server durning the development of the program.
 
 ## License
-[MIT](LICENCE)
+[MIT](LICENSE)
