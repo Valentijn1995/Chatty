@@ -10,7 +10,7 @@ Chatty offers the following features:
 * Messages are saved in a database if the recipient of the messages is offline
 
 ## Installation
-You can download the latest stable release from the master branch. The client and server branch are development branches.
+You can download the latest stable release from the [releases](releases) page. The client and server branch are development branches.
 
 ### Installing the server
 Steps for getting the server running:
